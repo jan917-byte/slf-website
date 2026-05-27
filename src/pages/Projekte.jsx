@@ -58,36 +58,26 @@ export default function Projekte() {
         padding: isMobile ? '32px 20px 56px' : '48px 56px 72px',
         display: 'grid',
         gridTemplateColumns: width < 640 ? '1fr' : width < 1024 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
-        gap: width < 640 ? '48px 0' : '72px 40px',
+        gap: width < 640 ? '36px 0' : '44px 40px',
       }}>
         {filtered.map((p) => (
-          <div key={p.id}>
-            <ProjectImage proj={p} ratio="4/3" />
+          <Link
+            key={p.id}
+            to={`/projekte/${p.id}`}
+            style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+          >
+            <ProjectImage proj={p} ratio="4/3" title={p.titel} />
             <div style={{
-              marginTop: 18, display: 'flex', justifyContent: 'space-between',
+              marginTop: 12, display: 'flex', justifyContent: 'space-between',
               fontSize: 11, color: A.mute, letterSpacing: '0.08em', textTransform: 'uppercase',
             }}>
               <span>{p.kategorie}</span>
-              <span>{p.jahr}</span>
+              <span>{p.jahr ?? (p.wpDate ? new Date(p.wpDate).getFullYear() : null)}</span>
             </div>
-            <h3 style={{
-              fontSize: 24, fontWeight: 500, lineHeight: 1.2,
-              letterSpacing: '0', margin: '10px 0 0',
-            }}>
-              {p.titel}
-            </h3>
             {p.untertitel && (
-              <div style={{ fontSize: 15, color: A.mute, marginTop: 3 }}>{p.untertitel}</div>
+              <div style={{ fontSize: 13, color: A.mute, marginTop: 4 }}>{p.untertitel}</div>
             )}
-            <div style={{
-              marginTop: 14,
-              display: 'flex', justifyContent: 'space-between',
-              fontSize: 12, color: A.mute,
-            }}>
-              <span>{p.ort}</span>
-              <span>{p.flaeche}</span>
-            </div>
-          </div>
+          </Link>
         ))}
       </div>
 

@@ -1,129 +1,154 @@
-# SLF Berlin — Redesign du Site Web
+# CLAUDE.md
 
-## Contexte
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Site web pour **Stadt Land Fluss PartG mbB**, cabinet berlinois d'urbanisme fondé en 1992. Trois associés : Georg Börsch-Supan, Samir Hamzeh, Barbara Horst. J. Miller Stevens, fondateur, a transmis le bureau et reste consultant.
+## Project
 
-Direction choisie : **A — "Editorial Index"** (rejetée : Direction B "Archive Grid").
+Website for **Stadt Land Fluss PartG mbB**, a Berlin urban-planning practice founded 1992. Partners: Georg Börsch-Supan, Samir Hamzeh, Barbara Horst. J. Miller Stevens (founder) remains a consultant.
+
+Design direction: **A — "Editorial Index"**. Reference source: `_design/direction-a.jsx` and `_design/screenshots/`.
+
+## Commands
+
+```bash
+npm run dev      # dev server → http://localhost:5173
+npm run sync     # fetch projects from WordPress → src/data/projects.js
+npm run build    # sync + production build → dist/
+npm run preview  # preview production build
+```
+
+No test runner is configured.
 
 ## Stack
 
-- **Vite + React 18** — `npm run dev` pour démarrer (port 5173)
-- **react-router-dom v6** — routing côté client (SPA)
-- Pas de framework CSS — styles inline React (fidèle au design original)
-- Pas de TypeScript — JSX pur
+- **Vite + React 18**, pure JSX (no TypeScript)
+- **react-router-dom v6** — client-side SPA routing
+- All styles are **inline React styles** — no CSS framework, no CSS files
+- Design tokens imported from `src/tokens.js` as `{ tokens as A, base }`
 
-## Structure du projet
+## Architecture
 
-```
-slf/
-├── CLAUDE.md
-├── _design/               ← export Claude Design original (lecture seule, référence)
-│   ├── direction-a.jsx    ← source de vérité pour le design Direction A
-│   ├── direction-b.jsx    ← archivé, non retenu
-│   ├── screenshots/       ← captures de référence (a-home-focus.png, etc.)
-│   └── ...
-├── src/
-│   ├── tokens.js          ← design tokens (couleurs, polices)
-│   ├── main.jsx           ← point d'entrée React
-│   ├── App.jsx            ← routing (BrowserRouter + Routes)
-│   ├── components/
-│   │   ├── Nav.jsx        ← navigation sticky
-│   │   ├── Footer.jsx     ← pied de page 4 colonnes
-│   │   ├── ProjectFeedItem.jsx  ← item du feed (alternance L/R)
-│   │   └── ProjectImage.jsx    ← image de projet (placeholder + vraie photo)
-│   ├── pages/
-│   │   ├── Home.jsx       ← page d'accueil (hero + feed 6 projets + notiz)
-│   │   └── Projekte.jsx   ← grille de projets (2 colonnes + filtres)
-│   ├── data/
-│   │   └── projects.js    ← 10 projets (tableau exporté par défaut)
-│   └── assets/
-│       ├── SLF_Logo.svg
-│       └── deckblatt-homepage.jpg
-├── index.html             ← template Vite (polices D-DIN + Barlow chargées ici)
-├── vite.config.js
-└── package.json
-```
+### Tokens (`src/tokens.js`)
 
-## Design Tokens (src/tokens.js)
+Two named exports used everywhere:
 
-| Token | Valeur | Usage |
+- `tokens` — color and font values (always imported as `A`)
+- `base` — base style object applied to page root divs (`fontFamily`, `color`, `background`, `WebkitFontSmoothing`)
+
+| Token | Value | Role |
 |---|---|---|
-| `bg` | `#ffffff` | Fond principal |
-| `ink` | `#0e0e10` | Texte principal |
-| `mute` | `#6b6b6e` | Texte secondaire, méta |
-| `rule` | `#e6e5e2` | Lignes de séparation |
-| `ruleSoft` | `#f1f0ed` | Séparations très subtiles |
-| `accent` | `#ccc8a6` | Kaki sable (couleur logo SLF) |
-| `accentSoft` | `#f3f1e3` | Teinte très claire kaki |
-| `accentDeep` | `#8a8765` | Kaki foncé (labels de section) |
+| `bg` | `#ffffff` | Page background |
+| `ink` | `#0e0e10` | Primary text |
+| `mute` | `#6b6b6e` | Secondary text, meta |
+| `rule` | `#e6e5e2` | Dividers |
+| `ruleSoft` | `#f1f0ed` | Subtle dividers |
+| `accent` | `#ccc8a6` | Sand khaki (logo color) |
+| `accentSoft` | `#f3f1e3` | Very light khaki tint |
+| `accentDeep` | `#8a8765` | Dark khaki (section labels) |
 
-## Typographie
+### Typography
 
-Police principale : **D-DIN** (open-source Datto, SIL OFL)
-Chargée via CDN jsdelivr dans `index.html`. Fallback : Barlow (Google Fonts).
+Primary font: **D-DIN** loaded via CDN in `index.html`. Fallback chain: `"DIN Next LT Pro", "DIN Pro", "Barlow", sans-serif`.
 
+- Section labels: 11px, uppercase, `letterSpacing: '0.12em'`, `accentDeep`
+- Project meta: 11px, uppercase, `letterSpacing: '0.08–0.1em'`
+- Titles: `fontWeight: 400`, `letterSpacing: '-0.015em'`
+
+### Layout conventions
+
+- Horizontal padding: **56px** desktop, **20px** mobile
+- 12-column grid via `gridTemplateColumns: 'repeat(12, 1fr)'`, gap 24px
+- Section label: column 1 (`'1 / span 1'`), content: columns 3–10
+
+### Responsive breakpoints
+
+All components use the `useWindowWidth()` hook (`src/hooks/useWindowWidth.js`) — no CSS media queries.
+
+| Breakpoint | `isMobile` context |
+|---|---|
+| `< 768px` | Nav, Home, ProjectFeedItem |
+| `< 640px` | Projekte page |
+
+### Routing (`src/App.jsx`)
+
+| URL | Component |
+|---|---|
+| `/` | `src/pages/Home.jsx` |
+| `/projekte` | `src/pages/Projekte.jsx` |
+| `*` | Redirect → `/` |
+
+Pages not yet built: `/buero`, `/buero/ueber-uns`, `/buero/leistungen`, `/buero/team`, `/kontakt`, `/projekte/:id`.
+
+### Navigation (`src/components/Nav.jsx`)
+
+Sticky nav with:
+- Desktop: hover-activated dropdown panels (120ms close delay via `closeTimer` ref)
+- Mobile (< 768px): hamburger → full-screen overlay
+- Active state: `pathname` match highlights link with `accent` underline
+
+Nav items and their dropdown children are defined in the `navItems` array at the top of `Nav.jsx`. Projekte dropdown items are generated from `PROJEKTE_NAV` in `src/data/filters.js`.
+
+### Data
+
+**`src/data/projects.js`** — ⚠️ **auto-generated** — do not edit by hand. Regenerated each `npm run build` and on demand with `npm run sync`. Source: WordPress REST API (`https://www.slf-berlin.de/wp-json/wp/v2/posts`). Keep committed in git as a build-time fallback.
+
+Fields per project object:
 ```
-font: '"D-DIN", "DIN Next LT Pro", "DIN Pro", "Barlow", sans-serif'
+id (WP slug), titel, untertitel (''), beschreibung (WP excerpt stripped),
+ort (null), jahr (null), kategorie, flaeche (null), auftraggeber (null),
+tone ('photo'|'plan'), image (WP featured media URL or null),
+wpId, wpDate, wpLink
 ```
 
-- Titres : fontWeight 400, letterSpacing -0.015em
-- Navigation : 14px, letterSpacing 0.01em
-- Labels de section : 11px, uppercase, letterSpacing 0.12em, accentDeep
-- Méta projet : 11px, uppercase, letterSpacing 0.08–0.1em
+`ort`, `jahr`, `flaeche`, `auftraggeber` are `null` — WP has no dedicated ACF fields for these. If the client wants structured metadata, add ACF fields in WordPress and update `scripts/sync-from-wordpress.mjs`.
 
-## Layout
+**`src/data/filters.js`** — three exports:
 
-- Grid 12 colonnes, padding horizontal **56px**, gap 24px
-- Padding vertical sections : 48px–88px
-- Nav sticky : 88px de hauteur (logo)
-- Grille projets : 2 colonnes, gap 72px vertical / 40px horizontal
+- `PROJEKTE_NAV` — array of `{ label, key }` filter tabs (key `null` = show all)
+- `FILTER_FN` — map of `key → (project) => boolean` predicate functions (exact match on WP category name)
+- `filterHref(key)` — returns `/projekte` or `/projekte?filter=<key>`
 
-## Routes
+Filtering on `/projekte` reads `?filter=` from `useSearchParams()` and applies `FILTER_FN[key]`.
 
-| URL | Page | Composant |
+**`scripts/sync-from-wordpress.mjs`** — Node ESM script. Paginates through all published WP posts, maps each to a project object, writes `src/data/projects.js`. WordPress category slugs → React `kategorie` label:
+
+| WP slug | `kategorie` |
+|---|---|
+| `entwicklungskonzepte` | `Entwicklungskonzepte` |
+| `wettbewerbe` | `Wettbewerbe` |
+| `bauleitplanung` | `Bauleitplanung` |
+| `verfahrensbetreuung` | `Verfahrensbetreuung` |
+
+Posts in multiple WP categories: first matching category wins. Posts with no known category are silently skipped (with a warning log). If WP is unreachable and `projects.js` already exists, the script exits cleanly (warning, no overwrite) so the build succeeds with stale data.
+
+### Project grid (`src/pages/Projekte.jsx`)
+
+Responsive column count driven by `useWindowWidth()`:
+- `< 640px` → 1 column
+- `640–1023px` → 2 columns
+- `≥ 1024px` → 3 columns
+
+### Hero hover interaction (`src/pages/Home.jsx`)
+
+The hero image (`deckblatt-homepage-v3.jpg`) is a composite JPG of 3 sub-images with white gaps. Five absolutely-positioned flex segments (3 hotspots + 2 gap spacers) map to `LEISTUNGEN[0–2]`. `hoveredLeistung` state (index or `null`) drives overlay opacity.
+
+Flex proportions (measured at 1400px width):
+
+| Segment | Flex | Role |
 |---|---|---|
-| `/` | Accueil | `src/pages/Home.jsx` |
-| `/projekte` | Projets | `src/pages/Projekte.jsx` |
-| `*` | Redirect → `/` | — |
+| `0 0 31.64%` | Image 1 | Konzeptionell |
+| `0 0 2.43%` | Gap 1 | inactive |
+| `0 0 31.79%` | Image 2 | Städtebau |
+| `0 0 2.36%` | Gap 2 | inactive |
+| `1` | Image 3 | Bauleitplanung |
 
-Pages à créer : `/buero`, `/kontakt`, pages détail projet.
+If the hero image is replaced, re-measure gaps and update the segment array in `Home.jsx`.
 
-## Données projets (src/data/projects.js)
+## Suggested next steps
 
-Tableau de 10 objets avec les champs :
-- `id` — slug kebab-case
-- `titel`, `untertitel`, `beschreibung` — titres et description (allemand)
-- `ort` — ville
-- `jahr` — année ou plage (ex: "2025–2026")
-- `kategorie` — type de mission
-- `flaeche` — surface ou périmètre
-- `auftraggeber` — maître d'ouvrage
-- `tone` — `'photo'` ou `'plan'` (affecte le placeholder)
-- `image` *(optionnel)* — chemin vers une vraie image (sinon placeholder affiché)
-
-## Commandes
-
-```bash
-npm run dev      # dev server sur http://localhost:5173
-npm run build    # build de production → dist/
-npm run preview  # prévisualisation du build
-```
-
-## Prochaines étapes suggérées
-
-1. **Photos réelles** : ajouter le champ `image` dans `projects.js` et importer les fichiers dans `src/assets/`
-2. **Page détail projet** : route `/projekte/:id` avec layout pleine page
-3. **Page Büro** : présentation de l'équipe et historique du cabinet
-4. **Page Kontakt** : formulaire + carte
-5. **SEO** : balises `<title>` et `<meta>` par page (react-helmet ou Vite plugin)
-6. **Responsive** : breakpoints mobile (actuellement optimisé pour ≥ 1024px)
-
-## Référence design
-
-Voir `_design/screenshots/` :
-- `a-home-focus.png` — vue de référence de la page d'accueil
-- `01-all-boards.png` / `02-all-boards.png` — vue globale des deux directions
-- `overview.png` — overview général
-
-Fichier source complet du design Direction A : `_design/direction-a.jsx`
+1. **Real photos** — add `image` field to `projects.js` entries, import files into `src/assets/`
+2. **Project detail page** — route `/projekte/:id`
+3. **Büro page** — team presentation and firm history
+4. **Kontakt page** — form + map
+5. **SEO** — per-page `<title>` / `<meta>` (react-helmet or Vite plugin)
+6. **Responsive** — currently optimized for ≥ 768px desktop

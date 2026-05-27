@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { tokens as A, base } from '../tokens'
 import Nav from '../components/Nav'
@@ -9,9 +10,25 @@ import { useWindowWidth } from '../hooks/useWindowWidth'
 
 const featured = projects.slice(0, 6)
 
+const LEISTUNGEN = [
+  {
+    titel: 'Konzeptionell',
+    beschreibung: 'Strategische Stadtplanung, Machbarkeitsstudien, Wettbewerbsteilnahmen und Partizipationsverfahren.',
+  },
+  {
+    titel: 'Städtebau',
+    beschreibung: 'Städtebauliche Entwürfe, Quartiersentwicklung und Gestaltungskonzepte für urbane Räume.',
+  },
+  {
+    titel: 'Bauleitplanung',
+    beschreibung: 'Flächennutzungspläne, Bebauungspläne und formelle Planungsverfahren nach BauGB.',
+  },
+]
+
 export default function Home() {
   const width = useWindowWidth()
   const isMobile = width < 768
+  const [hoveredLeistung, setHoveredLeistung] = useState(null)
 
   const hPad = isMobile ? 20 : 56
   const vPad = isMobile ? 56 : 88
@@ -26,12 +43,59 @@ export default function Home() {
       <Nav />
 
       {/* Hero */}
-      <div style={{ position: 'relative', background: A.bg }}>
+      <div style={{ background: A.bg, paddingLeft: isMobile ? 12 : 36, paddingRight: isMobile ? 12 : 36 }}>
+        <div style={{ position: 'relative' }}>
         <img
           src={heroBild}
           alt="Deckblatt — Quartiersentwicklung, Lageplan & Bebauungsplan"
           style={{ display: 'block', width: '100%', height: isMobile ? 280 : 620, objectFit: 'cover' }}
         />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
+          {[
+            { li: 0, flex: '0 0 31.64%' },
+            { gap: true, flex: '0 0 2.43%' },
+            { li: 1, flex: '0 0 31.79%' },
+            { gap: true, flex: '0 0 2.36%' },
+            { li: 2, flex: '1' },
+          ].map((seg, i) => seg.gap ? (
+            <div key={i} style={{ flex: seg.flex, pointerEvents: 'none' }} />
+          ) : (
+            <div
+              key={i}
+              onMouseEnter={() => setHoveredLeistung(seg.li)}
+              onMouseLeave={() => setHoveredLeistung(null)}
+              style={{ flex: seg.flex, position: 'relative', cursor: 'default' }}
+            >
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'rgba(14,14,16,0.72)',
+                opacity: hoveredLeistung === seg.li ? 1 : 0,
+                transition: 'opacity 0.28s ease',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                padding: 24,
+              }}>
+                <div style={{ width: 28, height: 3, background: A.accent, marginBottom: 14 }} />
+                <div style={{
+                  fontSize: isMobile ? 16 : 22,
+                  fontWeight: 400, color: '#fff',
+                  letterSpacing: '-0.01em', textAlign: 'center',
+                }}>
+                  {LEISTUNGEN[seg.li].titel}
+                </div>
+                <div style={{
+                  fontSize: isMobile ? 12 : 13,
+                  color: 'rgba(255,255,255,0.65)',
+                  marginTop: 10, lineHeight: 1.5,
+                  textAlign: 'center', maxWidth: 200,
+                }}>
+                  {LEISTUNGEN[seg.li].beschreibung}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        </div>
       </div>
 
       {/* Intro */}
@@ -41,71 +105,62 @@ export default function Home() {
       }}>
         <div style={{
           gridColumn: labelCol,
-          fontSize: 11, color: A.accentDeep,
+          fontSize: 13, color: A.accentDeep,
           letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500,
         }}>
-          01 / Willkommen
+          01 /<br />Das Büro
         </div>
         <div style={{ gridColumn: contentCol }}>
           <h1 style={{
-            fontWeight: 400, lineHeight: 1.06,
+            fontWeight: 400, lineHeight: 1.2,
             letterSpacing: '-0.015em', margin: 0,
-            fontSize: isMobile ? 24 : 30,
+            fontSize: isMobile ? 20 : 28,
           }}>
-            Praxisorientierte Stadtplanung und kontextueller
-            Städtebau&nbsp;— seit über dreißig Jahren aus Berlin.
+            Willkommen<br />
+            bei STADT LAND FLUSS Städtebau und Stadtplanung PartGmbB!
           </h1>
           <p style={{
-            fontSize: isMobile ? 15 : 17, lineHeight: 1.55, color: A.mute,
+            fontSize: 18, lineHeight: 1.55, color: A.mute,
             maxWidth: 640, marginTop: 28,
           }}>
-            Wir arbeiten integrativ, komplex, fachübergreifend und teamorientiert.
-            Unser Aufgabenspektrum umfasst strategische Stadtplanung, Bauleitplanung,
-            Quartiersentwicklung, städtebauliche Machbarkeitsstudien,
-            Wettbewerbsteilnahmen und Partizipationsverfahren.
+            Wir verfügen über eine umfassende Erfahrung in der praxisorientierten Stadtplanung und im kontextuellen Städtebau.
           </p>
-          <div style={{
-            marginTop: 36, display: 'flex', gap: isMobile ? 20 : 36, flexWrap: 'wrap',
-            fontSize: 12, color: A.mute,
-            letterSpacing: '0.06em', textTransform: 'uppercase',
+          <p style={{
+            fontSize: 18, lineHeight: 1.55, color: A.mute,
+            maxWidth: 640, marginTop: 20,
           }}>
-            <span>Berlin</span>
-            <span>gegr. 1992</span>
-            <span>PartG mbB</span>
-            <span>3 Partner:innen</span>
-          </div>
+            Wir arbeiten integrativ, komplex, fachübergreifend sowie teamorientiert und engagieren uns für die Sicherung einer menschenwürdigen Umwelt.
+          </p>
+          <p style={{ marginTop: 20, fontSize: 18, color: A.mute, lineHeight: 1.55, maxWidth: 640 }}>
+            Wir freuen uns auf spannende Projekte und weiterhin gute Zusammenarbeit in alten und neuen Konstellationen!
+          </p>
         </div>
       </div>
 
       {/* Section header */}
       <div style={{
-        padding: `${vPadSmall}px ${hPad}px 24px`,
+        padding: `${isMobile ? 32 : 48}px ${hPad}px 24px`,
         display: 'grid', gridTemplateColumns: gridCols, gap: 24,
         borderBottom: `1px solid ${A.rule}`,
       }}>
         <div style={{
           gridColumn: labelCol,
-          fontSize: 11, color: A.accentDeep,
+          fontSize: 13, color: A.accentDeep,
           letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500,
         }}>
           02 / Aktuell
         </div>
-        <div style={{ gridColumn: contentColWide }}>
-          <div style={{ fontSize: isMobile ? 26 : 34, fontWeight: 400, letterSpacing: '-0.01em' }}>
+        <div style={{ gridColumn: contentColWide, display: 'flex', alignItems: 'baseline', gap: 20 }}>
+          <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 400, letterSpacing: '-0.01em' }}>
             Ausgewählte Projekte
           </div>
-          <div style={{ color: A.mute, marginTop: 6, fontSize: 14 }}>
-            Eine Auswahl laufender und kürzlich abgeschlossener Arbeiten.{' '}
-            <Link to="/projekte" style={{
-              marginLeft: isMobile ? 0 : 12,
-              display: isMobile ? 'inline-block' : 'inline',
-              marginTop: isMobile ? 6 : 0,
-              borderBottom: `2px solid ${A.accent}`,
-              color: A.ink, paddingBottom: 2,
-            }}>
-              Alle Projekte ansehen →
-            </Link>
-          </div>
+          <Link to="/projekte" style={{
+            fontSize: 14,
+            borderBottom: `2px solid ${A.accent}`,
+            color: A.ink, paddingBottom: 2,
+          }}>
+            Alle Projekte ansehen →
+          </Link>
         </div>
       </div>
 
@@ -127,13 +182,13 @@ export default function Home() {
       }}>
         <div style={{
           gridColumn: labelCol,
-          fontSize: 11, color: A.accentDeep,
+          fontSize: 13, color: A.accentDeep,
           letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500,
         }}>
           03 / Notiz
         </div>
         <div style={{ gridColumn: contentCol }}>
-          <p style={{ fontSize: isMobile ? 16 : 19, lineHeight: 1.5, color: A.ink, margin: 0, maxWidth: 680 }}>
+          <p style={{ fontSize: 16, lineHeight: 1.5, color: A.ink, margin: 0, maxWidth: 680 }}>
             Nach mehr als 30 Jahren hat <em>J. Miller Stevens</em> das Büro an
             Georg Börsch-Supan, Samir Hamzeh und Barbara Horst übergeben.
             J. Miller Stevens wird uns weiterhin mit seinem umfangreichen

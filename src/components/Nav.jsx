@@ -139,7 +139,7 @@ export default function Nav() {
                   onMouseLeave={() => setHoveredLabel(null)}
                   style={{
                     color: (active || isHovered) ? A.ink : A.mute,
-                    borderBottom: (active || isHovered) ? `2px solid ${A.accent}` : '2px solid transparent',
+                    borderBottom: (active || isHovered) ? `3px solid ${A.accent}` : '3px solid transparent',
                     paddingBottom: 4,
                     fontWeight: active ? 500 : 400,
                     letterSpacing: '0.01em',

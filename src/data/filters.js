@@ -8,15 +8,10 @@ export const PROJEKTE_NAV = [
 ]
 
 export const FILTER_FN = {
-  entwicklungskonzepte: (p) =>
-    p.kategorie.includes('Strategische') ||
-    p.kategorie === 'Rahmenplanung' ||
-    p.kategorie === 'Quartiersentwicklung' ||
-    p.kategorie.toLowerCase().includes('studie') ||
-    p.kategorie.toLowerCase().includes('machbarkeit'),
-  wettbewerbe: (p) => p.kategorie === 'Städtebaulicher Wettbewerb',
+  entwicklungskonzepte: (p) => p.kategorie === 'Entwicklungskonzepte',
+  wettbewerbe: (p) => p.kategorie === 'Wettbewerbe',
   bauleitplanung: (p) => p.kategorie === 'Bauleitplanung',
-  verfahrensbetreuung: (p) => p.kategorie === 'Wettbewerbskoordination',
+  verfahrensbetreuung: (p) => p.kategorie === 'Verfahrensbetreuung',
   projektliste: () => true,
 }
 

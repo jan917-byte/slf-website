@@ -26,46 +26,45 @@ export default function ProjectFeedItem({ proj, align = 'L', large = false }) {
         display: 'flex', gap: 12, alignItems: 'center',
       }}>
         <span>{proj.kategorie}</span>
-        <span style={{ width: 18, height: 2, background: A.accent }} />
+        <span style={{ width: 18, height: 3, background: A.accent }} />
         <span>{proj.jahr}</span>
       </div>
 
       <h3 style={{
-        fontSize: isMobile ? 22 : 26, fontWeight: 500, lineHeight: 1.18,
-        letterSpacing: '-0.005em',
+        fontSize: isMobile ? 18 : 22, fontWeight: 400, lineHeight: 1.15,
+        letterSpacing: '-0.01em',
         margin: '12px 0 0',
       }}>
         {proj.titel}
       </h3>
 
       {proj.untertitel && (
-        <div style={{ fontSize: 15, color: A.mute, marginTop: 4 }}>{proj.untertitel}</div>
+        <div style={{ fontSize: 14, color: A.mute, marginTop: 6 }}>{proj.untertitel}</div>
       )}
+
+      <div style={{
+        marginTop: 10,
+        fontSize: 11, color: A.accentDeep,
+        letterSpacing: '0.08em', textTransform: 'uppercase',
+      }}>
+        {proj.ort}
+      </div>
 
       {proj.beschreibung && (
         <p style={{
-          fontSize: 14, lineHeight: 1.55, color: A.ink,
-          margin: '18px 0 0', maxWidth: 380,
+          fontSize: 16, lineHeight: 1.6, color: A.ink,
+          margin: '16px 0 0', maxWidth: 400,
         }}>
           {proj.beschreibung}
         </p>
       )}
 
-      <div style={{
-        marginTop: 22,
-        display: 'flex', justifyContent: 'space-between',
-        fontSize: 12, color: A.mute,
-      }}>
-        <span>{proj.ort}</span>
-        <span>{proj.flaeche}</span>
-      </div>
-
-      <div style={{ marginTop: 22, fontSize: 13 }}>
+      <div style={{ marginTop: 24, fontSize: 14 }}>
         <span
           onMouseEnter={() => setCtaHovered(true)}
           onMouseLeave={() => setCtaHovered(false)}
           style={{
-            borderBottom: `2px solid ${ctaHovered ? A.accentDeep : A.accent}`,
+            borderBottom: `3px solid ${ctaHovered ? A.accentDeep : A.accent}`,
             paddingBottom: 3,
             color: ctaHovered ? A.ink : A.mute,
             cursor: 'pointer',

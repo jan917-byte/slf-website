@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "sync": "node scripts/sync-from-wordpress.mjs",
+    "prebuild": "node scripts/sync-from-wordpress.mjs",
     "build": "vite build",
     "preview": "vite preview"
   },
