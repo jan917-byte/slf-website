@@ -39,12 +39,20 @@ export default function Home() {
   const [hoveredLeistung, setHoveredLeistung] = useState(null)
 
   const hPad = isMobile ? 20 : 56
-  const vPad = isMobile ? 56 : 88
-  const vPadSmall = isMobile ? 40 : 88
+  const vPad = isMobile ? 56 : 112
+  const vPadSmall = isMobile ? 40 : 112
   const gridCols = isMobile ? '1fr' : 'repeat(12, 1fr)'
   const labelCol = isMobile ? 'auto' : '1 / span 1'
   const contentCol = isMobile ? 'auto' : '3 / span 8'
   const contentColWide = isMobile ? 'auto' : '3 / span 9'
+
+  // Compute overlay title font size to fit "Quartiersentwicklung" (20 chars) on one line
+  const heroPad = isMobile ? 24 : 72
+  const overlayPad = isMobile ? 16 : 48
+  const segContentWidth = (width - heroPad) * 0.3164 - overlayPad
+  // D-DIN char width ≈ 0.52em for this condensed font
+  const titleFontSize = Math.min(isMobile ? 15 : 28, Math.max(9, Math.floor(segContentWidth / (20 * 0.52))))
+  const showDesc = width >= 1000
 
   return (
     <div style={base}>
@@ -72,7 +80,7 @@ export default function Home() {
               key={i}
               onMouseEnter={() => setHoveredLeistung(seg.li)}
               onMouseLeave={() => setHoveredLeistung(null)}
-              style={{ flex: seg.flex, position: 'relative', cursor: 'default' }}
+              style={{ flex: seg.flex, position: 'relative', cursor: 'default', overflow: 'hidden' }}
             >
               <div style={{
                 position: 'absolute', inset: 0,
@@ -81,25 +89,27 @@ export default function Home() {
                 transition: 'opacity 0.28s ease',
                 display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
-                padding: 24,
+                padding: isMobile ? 8 : 24,
               }}>
-                <div style={{ width: 32, height: 3, background: A.accent, marginBottom: 18 }} />
+                <div style={{ width: 32, height: 3, background: A.accent, marginBottom: isMobile ? 10 : 18 }} />
                 <div style={{
-                  fontSize: isMobile ? 22 : 32,
-                  fontWeight: 400, color: '#fff',
+                  fontSize: titleFontSize,
+                  fontWeight: 600, color: '#fff',
                   letterSpacing: '-0.02em', textAlign: 'center',
-                  lineHeight: 1.15,
+                  lineHeight: 1.2, whiteSpace: 'nowrap',
                 }}>
                   {LEISTUNGEN[seg.li].titel}
                 </div>
-                <div style={{
-                  fontSize: isMobile ? 14 : 16,
-                  color: 'rgba(255,255,255,0.82)',
-                  marginTop: 14, lineHeight: 1.55,
-                  textAlign: 'center', maxWidth: 240,
-                }}>
-                  {LEISTUNGEN[seg.li].beschreibung}
-                </div>
+                {showDesc && (
+                  <div style={{
+                    fontSize: 18,
+                    color: 'rgba(255,255,255,0.82)',
+                    marginTop: 14, lineHeight: 1.55,
+                    textAlign: 'center', maxWidth: 240,
+                  }}>
+                    {LEISTUNGEN[seg.li].beschreibung}
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -120,21 +130,21 @@ export default function Home() {
         </div>
         <div style={{ gridColumn: contentCol }}>
           <h1 style={{
-            fontWeight: 500, lineHeight: 1.2,
+            fontWeight: 600, lineHeight: 1.2,
             letterSpacing: '-0.015em', margin: 0,
-            fontSize: isMobile ? 20 : 28,
+            fontSize: isMobile ? 23 : 32,
           }}>
             Willkommen<br />
             bei STADT LAND FLUSS Städtebau und Stadtplanung PartGmbB!
           </h1>
           <p style={{
-            fontSize: 18, lineHeight: 1.55, color: A.mute,
+            fontSize: 18, lineHeight: 1.8, color: A.mute,
             maxWidth: 640, marginTop: 28,
           }}>
             Wir verfügen über eine umfassende Erfahrung in der praxisorientierten Stadtplanung und im kontextuellen Städtebau.
           </p>
           <p style={{
-            fontSize: 18, lineHeight: 1.55, color: A.mute,
+            fontSize: 18, lineHeight: 1.8, color: A.mute,
             maxWidth: 640, marginTop: 20,
           }}>
             Wir arbeiten integrativ, komplex, fachübergreifend sowie teamorientiert und engagieren uns für die Sicherung einer menschenwürdigen Umwelt.
@@ -149,7 +159,6 @@ export default function Home() {
       <div style={{
         padding: `${isMobile ? 32 : 48}px ${hPad}px 24px`,
         display: 'grid', gridTemplateColumns: gridCols, gap: 24,
-        borderBottom: `1px solid ${A.rule}`,
       }}>
         <div style={{
           gridColumn: labelCol,
@@ -158,7 +167,7 @@ export default function Home() {
           02 / Aktuell
         </div>
         <div style={{ gridColumn: contentColWide, display: 'flex', alignItems: 'baseline', gap: 20 }}>
-          <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 500, letterSpacing: '-0.01em' }}>
+          <div style={{ fontSize: isMobile ? 20 : 30, fontWeight: 600, letterSpacing: '-0.01em' }}>
             Ausgewählte Projekte
           </div>
           <Link to="/projekte" style={{
@@ -185,7 +194,6 @@ export default function Home() {
       {/* Notiz */}
       <div style={{
         padding: `${vPad}px ${hPad}px`,
-        borderTop: `1px solid ${A.rule}`,
         display: 'grid', gridTemplateColumns: gridCols, gap: 24,
       }}>
         <div style={{

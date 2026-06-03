@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Nav from '../components/Nav'
 import Footer from '../components/Footer'
+import BackToTop from '../components/BackToTop'
 import { tokens as A, base } from '../tokens'
 import { useWindowWidth } from '../hooks/useWindowWidth'
 import { TEAM } from '../data/team'
@@ -167,7 +168,7 @@ function TeamCard({ member, onClick }) {
 
       <div style={{ paddingTop: 10 }}>
         <div style={{
-          fontSize: 16, fontWeight: 500,
+          fontSize: 18, fontWeight: 600,
           letterSpacing: '-0.005em', color: A.ink,
           lineHeight: 1.3,
         }}>
@@ -212,7 +213,7 @@ export default function Team() {
           </div>
           <div style={{ gridColumn: isMobile ? 'auto' : '3 / span 8' }}>
             <h1 style={{
-              fontWeight: 500, fontSize: isMobile ? 20 : 28,
+              fontWeight: 600, fontSize: isMobile ? 23 : 32,
               letterSpacing: '-0.015em', margin: 0,
             }}>
               Das Team
@@ -237,6 +238,7 @@ export default function Team() {
 
       {selected && <Modal member={selected} onClose={() => setSelected(null)} />}
 
+      <BackToTop />
       <Footer />
     </div>
   )
