@@ -46,8 +46,12 @@ export default function Home() {
   const contentCol = isMobile ? 'auto' : '3 / span 8'
   const contentColWide = isMobile ? 'auto' : '3 / span 9'
 
+  // Hero scales proportionally so objectFit:cover never crops the sides (which misaligns hover segments)
+  const heroContainerWidth = width - 2 * hPad
+  const heroHeight = isMobile ? 280 : Math.min(660, Math.round(heroContainerWidth * (1423 / 2110)))
+
   // Compute overlay title font size to fit "Quartiersentwicklung" (20 chars) on one line
-  const heroPad = isMobile ? 24 : 72
+  const heroPad = hPad * 2
   const overlayPad = isMobile ? 16 : 48
   const segContentWidth = (width - heroPad) * 0.3164 - overlayPad
   // D-DIN char width ≈ 0.52em for this condensed font
@@ -59,12 +63,12 @@ export default function Home() {
       <Nav />
 
       {/* Hero */}
-      <div style={{ background: A.bg, paddingLeft: isMobile ? 12 : 36, paddingRight: isMobile ? 12 : 36 }}>
+      <div style={{ background: A.bg, paddingLeft: hPad, paddingRight: hPad }}>
         <div style={{ position: 'relative' }}>
         <img
           src={heroBild}
           alt="Deckblatt — Quartiersentwicklung, Lageplan & Bebauungsplan"
-          style={{ display: 'block', width: '100%', height: isMobile ? 280 : 620, objectFit: 'cover' }}
+          style={{ display: 'block', width: '100%', height: heroHeight, objectFit: 'cover' }}
         />
         <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
           {[
@@ -126,30 +130,37 @@ export default function Home() {
           gridColumn: labelCol,
           fontSize: 13, color: A.mute,
         }}>
-          01 /<br />Das Büro
+          01 /<br />Über uns
         </div>
         <div style={{ gridColumn: contentCol }}>
-          <h1 style={{
+          <div style={{
             fontWeight: 600, lineHeight: 1.2,
             letterSpacing: '-0.015em', margin: 0,
-            fontSize: isMobile ? 23 : 32,
+            fontSize: isMobile ? 24 : 38,
           }}>
-            Willkommen<br />
-            bei STADT LAND FLUSS Städtebau und Stadtplanung PartGmbB!
-          </h1>
+            Willkommen bei STADT LAND FLUSS
+          </div>
+          <div style={{
+            fontWeight: 400, lineHeight: 1.2,
+            letterSpacing: '-0.015em', marginTop: 6,
+            fontSize: isMobile ? 18 : 28,
+            color: A.ink,
+          }}>
+            Städtebau und Stadtplanung PartGmbB!
+          </div>
           <p style={{
-            fontSize: 18, lineHeight: 1.8, color: A.mute,
-            maxWidth: 640, marginTop: 28,
+            fontSize: isMobile ? 17 : 21, lineHeight: 1.75, color: A.ink,
+            maxWidth: 640, marginTop: 32,
           }}>
             Wir verfügen über eine umfassende Erfahrung in der praxisorientierten Stadtplanung und im kontextuellen Städtebau.
           </p>
           <p style={{
-            fontSize: 18, lineHeight: 1.8, color: A.mute,
+            fontSize: isMobile ? 17 : 21, lineHeight: 1.75, color: A.ink,
             maxWidth: 640, marginTop: 20,
           }}>
             Wir arbeiten integrativ, komplex, fachübergreifend sowie teamorientiert und engagieren uns für die Sicherung einer menschenwürdigen Umwelt.
           </p>
-          <p style={{ marginTop: 20, fontSize: 18, color: A.mute, lineHeight: 1.55, maxWidth: 640 }}>
+          <p style={{ marginTop: 20, fontSize: isMobile ? 17 : 21, color: A.ink, lineHeight: 1.75, maxWidth: 640 }}>
             Wir freuen uns auf spannende Projekte und weiterhin gute Zusammenarbeit in alten und neuen Konstellationen!
           </p>
         </div>
