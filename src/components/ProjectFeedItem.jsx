@@ -22,7 +22,7 @@ export default function ProjectFeedItem({ proj, align = 'L', large = false }) {
       paddingBottom: 6,
     }}>
       <div style={{
-        fontSize: 13, color: A.mute,
+        fontSize: 14, color: A.mute,
         display: 'flex', gap: 12, alignItems: 'baseline', flexWrap: 'wrap',
       }}>
         <span style={{ flexShrink: 1 }}>
@@ -44,11 +44,10 @@ export default function ProjectFeedItem({ proj, align = 'L', large = false }) {
         <div style={{
           display: 'inline-block',
           marginTop: 8,
-          fontSize: 12,
+          fontSize: 16,
           color: A.mute,
-          background: A.ruleSoft,
-          padding: '3px 8px',
-          borderRadius: 2,
+          border: `1px solid ${A.rule}`,
+          padding: '5px 12px',
         }}>
           {proj.ergebnis}
         </div>

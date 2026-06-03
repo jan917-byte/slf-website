@@ -9,7 +9,6 @@ const NAV_LINK_STYLE = `
     display: inline-block;
     color: inherit;
     text-decoration: none;
-    margin-bottom: 2px;
   }
   .footer-nav-link::after {
     content: '';
@@ -54,10 +53,10 @@ export default function Footer() {
         <div style={{ color: A.ink, fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
           Kontakt
         </div>
-        Mahlower Straße 24<br />
-        12049 Berlin<br />
-        030 612 808 48<br />
-        info@slf-berlin.de
+        <div style={{ marginBottom: 2 }}>Mahlower Straße 24</div>
+        <div style={{ marginBottom: 2 }}>12049 Berlin</div>
+        <div style={{ marginBottom: 2 }}>030 612 808 48</div>
+        <div>info@slf-berlin.de</div>
       </div>
 
       <div>

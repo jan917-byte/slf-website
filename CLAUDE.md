@@ -11,10 +11,11 @@ Design direction: **Bold Editorial** (merged from `style/bold-archi`). Reference
 ## Commands
 
 ```bash
-npm run dev      # dev server → http://localhost:5173
+npm run dev      # dev server → http://localhost:5173/slf-website/
 npm run sync     # fetch projects from WordPress → src/data/projects.js
 npm run build    # sync + production build → dist/
 npm run preview  # preview production build
+npm run deploy   # build + publish dist/ to GitHub Pages (gh-pages)
 ```
 
 No test runner is configured.
@@ -33,7 +34,7 @@ No test runner is configured.
 Two named exports used everywhere:
 
 - `tokens` — color and font values (always imported as `A`)
-- `base` — base style object applied to page root divs (`fontFamily`, `color`, `background`, `WebkitFontSmoothing`)
+- `base` — base style object applied to page root divs (`fontFamily`, `color`, `background`, `WebkitFontSmoothing`, `letterSpacing: '-0.005em'`)
 
 | Token | Value | Role |
 |---|---|---|
@@ -45,6 +46,8 @@ Two named exports used everywhere:
 | `accent` | `#ccc8a6` | Sand khaki (logo color) |
 | `accentSoft` | `#f3f1e3` | Very light khaki tint |
 | `accentDeep` | `#8a8765` | Dark khaki (section labels) |
+| `font` | D-DIN stack | Primary font family string |
+| `fontCondensed` | D-DIN Condensed stack | Condensed variant (used sparingly) |
 
 ### Typography
 
@@ -158,6 +161,8 @@ wpId, wpDate, wpLink
 
 Filtering on `/projekte` reads `?filter=` from `useSearchParams()` and applies `FILTER_FN[key]`.
 
+The `projektliste` key is special: it passes all projects through (`() => true`) and renders a **sortable table view** instead of the tile grid. Columns are sortable by Jahr, Auftraggeber, Ort, and Kategorie. `ort` and `auftraggeber` are extracted from the `<dl class="slf-daten">` block inside `project.content` at render time.
+
 **`scripts/sync-from-wordpress.mjs`** — Node ESM script. Paginates WP posts, maps each to a project object, writes `src/data/projects.js`. WordPress category slugs → React `kategorie` label:
 
 | WP slug | `kategorie` |
@@ -243,7 +248,48 @@ Exports: `window.{DesignCanvas, DCSection, DCArtboard, DCPostIt}`.
 | `public/SLF_Logo_notext.svg` | Logo without text (light version) |
 | `public/SLF_Logo_notext_b.svg` | Logo without text (dark/bold version) |
 
-Always serve static assets via `import.meta.env.BASE_URL + 'filename'` so the path resolves correctly when deployed to a subdirectory (GitHub Pages).
+Always serve static assets via `import.meta.env.BASE_URL + 'filename'` so the path resolves correctly when deployed to a subdirectory. `import.meta.env.BASE_URL` resolves to `/slf-website/` (configured in `vite.config.js` as `base: '/slf-website/'`).
+
+## Déploiement
+
+### Architecture cible
+
+```
+slf-berlin.de        → nouveau site React (hébergé sur Netlify)
+wp.slf-berlin.de     → WordPress existant (déplacé sur sous-domaine IONOS)
+```
+
+WordPress reste accessible pour l'admin et l'API REST. Le script de sync tourne toujours normalement.
+
+### Étapes à suivre (hébergeur : IONOS)
+
+**1. Déplacer WordPress sur `wp.slf-berlin.de`**
+- Dans le panneau IONOS : créer le sous-domaine `wp.slf-berlin.de` et le pointer vers le dossier WordPress existant
+- Dans WordPress > Réglages > Général : changer l'URL du site en `https://wp.slf-berlin.de`
+- Vérifier que `https://wp.slf-berlin.de/wp-json/wp/v2/posts` répond bien
+
+**2. Mettre à jour le script de sync**
+Dans `scripts/sync-from-wordpress.mjs`, remplacer l'URL de base :
+```js
+// avant
+https://www.slf-berlin.de/wp-json/wp/v2/posts
+// après
+https://wp.slf-berlin.de/wp-json/wp/v2/posts
+```
+
+**3. Déployer le React sur Netlify**
+- Créer un compte sur [netlify.com](https://netlify.com)
+- Connecter le repo GitHub → Netlify déploie automatiquement à chaque `git push`
+- Réglages de build : `npm run build` / dossier de sortie : `dist`
+- Ajouter un fichier `public/_redirects` avec `/* /index.html 200` pour le SPA routing
+
+**4. Pointer le domaine `slf-berlin.de` vers Netlify**
+- Dans Netlify : Domaines > ajouter `slf-berlin.de`
+- Dans IONOS : modifier les enregistrements DNS de `slf-berlin.de` pour pointer vers Netlify (Netlify fournit les valeurs exactes)
+- Prévoir 24–48h de propagation DNS
+
+### Notes SEO
+Le nouveau site a une structure d'URLs différente de WordPress. Les anciennes URLs WP (ex. `/2023/01/nom-projet/`) deviendront des 404. Impact limité car les projets individuels n'étaient pas mis en avant dans le référencement, mais à surveiller dans Google Search Console après le déploiement.
 
 ## Suggested next steps
 

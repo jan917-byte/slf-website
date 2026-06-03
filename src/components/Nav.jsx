@@ -1,10 +1,43 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import logo from '../assets/SLF_Logo_Lang.svg'
+import logoRaw from '../assets/SLF_Logo_Lang.svg?raw'
 import { tokens as A } from '../tokens'
 import { PROJEKTE_NAV, filterHref } from '../data/filters'
 import { useWindowWidth } from '../hooks/useWindowWidth'
 import projects from '../data/projects'
+
+// Strip the XML prolog / DOCTYPE so only the <svg> markup is injected into the DOM.
+const logoMarkup = logoRaw.slice(logoRaw.indexOf('<svg'))
+
+// Plays the logo intro once per full page load — not on client-side route changes
+// (Nav remounts on every navigation since it lives inside each page, not App.jsx).
+// Read in render (pure), flipped in an effect so StrictMode's double-invoke is safe.
+let logoIntroDone = false
+
+const LOGO_INTRO_STYLES = `
+.slf-logo svg { height: 100%; width: auto; display: block; overflow: visible; }
+@media (prefers-reduced-motion: no-preference) {
+  .slf-logo--intro .slf-word { opacity: 0; animation: slfWordIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .slf-logo--intro .slf-word-1 { animation-delay: 0.08s; }
+  .slf-logo--intro .slf-word-2 { animation-delay: 0.26s; }
+  .slf-logo--intro .slf-word-3 { animation-delay: 0.44s; }
+}
+@keyframes slfWordIn {
+  from { opacity: 0; transform: translateY(260px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+`
+
+// Inline SVG wordmark. `intro` triggers the staggered Stadt → Land → Fluss reveal.
+function Logo({ height, intro = false }) {
+  return (
+    <span
+      className={'slf-logo' + (intro ? ' slf-logo--intro' : '')}
+      style={{ display: 'inline-block', height, width: 'auto', lineHeight: 0 }}
+      dangerouslySetInnerHTML={{ __html: logoMarkup }}
+    />
+  )
+}
 
 const navItems = [
   {
@@ -55,6 +88,10 @@ export default function Nav() {
   const width = useWindowWidth()
   const isMobile = width < 768
 
+  // Freeze the intro decision at first mount; subsequent remounts (route changes) skip it.
+  const [playIntro] = useState(() => !logoIntroDone)
+  useEffect(() => { logoIntroDone = true }, [])
+
   const searchResults = searchQuery.trim().length > 1
     ? projects.filter(p => {
         const q = searchQuery.toLowerCase()
@@ -96,6 +133,7 @@ export default function Nav() {
 
   return (
     <>
+      <style>{LOGO_INTRO_STYLES}</style>
       <div style={{
         position: 'sticky', top: 0, zIndex: 100,
         background: A.bg,
@@ -104,11 +142,7 @@ export default function Nav() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <Link to="/" style={{ display: 'inline-flex', alignItems: 'center' }}>
-          <img
-            src={logo}
-            alt="Stadt Land Fluss — Städtebau und Stadtplanung PartG mbB"
-            style={{ height: isMobile ? 18 : 24, width: 'auto', display: 'block' }}
-          />
+          <Logo height={isMobile ? 18 : 24} intro={playIntro} />
         </Link>
 
         {isMobile ? (
@@ -153,7 +187,7 @@ export default function Nav() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <Link to="/" onClick={() => setMobileOpen(false)} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                      <img src={logo} alt="Stadt Land Fluss" style={{ height: 18, width: 'auto', display: 'block' }} />
+                      <Logo height={18} />
                     </Link>
                     <button
                       onClick={() => setMobileOpen(false)}

@@ -26,17 +26,48 @@ const PROSE_STYLES = `
 .slf-prose .slf-col-66 { flex: 2 1 0; min-width: 0; }
 .slf-prose .slf-col-100 { flex: 1 0 100%; }
 @media (max-width: 640px) { .slf-prose .slf-row { flex-direction: column; } .slf-prose .slf-row > * { width: 100% !important; } }
-.slf-prose .slf-daten-heading { font-size: 15px; font-weight: 600; color: #0e0e10; margin: 2.6em 0 14px; line-height: 1; }
-.slf-prose .slf-daten { margin: 0; display: grid; grid-template-columns: minmax(150px, 220px) 1fr; border-top: 1px solid #0e0e10; }
-.slf-prose .slf-daten dt { font-size: 14px; font-weight: 500; color: #6b6b6e; padding: 16px 20px 16px 0; margin: 0; border-bottom: 1px solid #e6e5e2; }
-.slf-prose .slf-daten dd { font-size: 18px; color: #0e0e10; padding: 16px 0; margin: 0; line-height: 1.4; border-bottom: 1px solid #e6e5e2; overflow-wrap: break-word; }
-@media (max-width: 640px) { .slf-prose .slf-daten { grid-template-columns: 1fr; } .slf-prose .slf-daten dt { padding: 14px 0 2px; border-bottom: none; } .slf-prose .slf-daten dd { font-size: 17px; padding: 0 0 14px; border-bottom: 1px solid #e6e5e2; } }
+.slf-prose .slf-daten-heading { font-size: 17px; font-weight: 600; color: #0e0e10; margin: 2.6em 0 14px; line-height: 1; }
+.slf-prose .slf-daten { margin: 0; display: grid; grid-template-columns: minmax(90px, 140px) 1fr; border-top: 1px solid #e6e5e2; }
+.slf-prose .slf-daten dt { font-size: 16px; font-weight: 500; color: #6b6b6e; padding: 14px 16px 14px 0; margin: 0; }
+.slf-prose .slf-daten dd { font-size: 16px; color: #0e0e10; padding: 14px 0; margin: 0; line-height: 1.4; overflow-wrap: break-word; }
+@media (max-width: 640px) { .slf-prose .slf-daten { grid-template-columns: 1fr; } .slf-prose .slf-daten dt { padding: 14px 0 2px; } .slf-prose .slf-daten dd { font-size: 17px; padding: 0 0 14px; } }
 `
 
 // Remove dt/dd pairs where the dd value is empty or whitespace-only.
+// Merge "Mehr Informationen" slf-rows into the preceding Projektdaten <dl>, auto-linking bare URLs.
 // Remove slf-rows where every column after the first contains only whitespace.
 function processContent(html) {
   let out = html.replace(/<dt>[^<]*<\/dt><dd>\s*<\/dd>/g, '');
+
+  const buildMehrInfo = (colContent) => {
+    const text = colContent.replace(/<[^>]+>/g, '').trim();
+    if (!text) return null;
+    let inner = colContent.replace(/^\s*<p>/, '').replace(/<\/p>\s*$/, '').trim();
+    inner = inner.replace(/<br\s*\/?>\s*$/, '').trim();
+    if (!/<a[\s>]/i.test(inner) && /^https?:\/\//.test(inner)) {
+      inner = `<a href="${inner}" target="_blank" rel="noopener noreferrer">${inner}</a>`;
+    }
+    return `<dt>Mehr Informationen</dt><dd>${inner}</dd>`;
+  };
+
+  // Case 1: "Mehr Informationen" row immediately after a </dl> → merge into it
+  out = out.replace(
+    /<\/dl>\s*<div class="slf-row"><div class="slf-col-50"><p>Mehr Informationen<\/p><\/div><div class="slf-col-50">([\s\S]*?)<\/div><\/div>/g,
+    (match, colContent) => {
+      const row = buildMehrInfo(colContent);
+      return row ? `${row}</dl>` : '</dl>';
+    }
+  );
+
+  // Case 2: standalone "Mehr Informationen" row (no preceding </dl>) → new <dl>
+  out = out.replace(
+    /<div class="slf-row"><div class="slf-col-50"><p>Mehr Informationen<\/p><\/div><div class="slf-col-50">([\s\S]*?)<\/div><\/div>/g,
+    (match, colContent) => {
+      const row = buildMehrInfo(colContent);
+      return row ? `<dl class="slf-daten">${row}</dl>` : '';
+    }
+  );
+
   out = out.replace(/<div class="slf-row">((?:<div class="slf-col-\d+">[\s\S]*?<\/div>)+)<\/div>/g, (match, inner) => {
     const cols = [...inner.matchAll(/<div class="slf-col-\d+">([\s\S]*?)<\/div>/g)];
     const contentCols = cols.slice(1);
@@ -58,12 +89,9 @@ export default function ProjectDetail() {
   const prev = idx > 0 ? projects[idx - 1] : null
   const next = idx < projects.length - 1 ? projects[idx + 1] : null
 
-  const year = project.jahr ?? (project.wpDate ? new Date(project.wpDate).getFullYear() : null)
   const hPad = isMobile ? 20 : 56
 
   const metaRows = [
-    { label: 'Kategorie', value: [].concat(project.kategorie).join(' / ') },
-    { label: 'Zeitraum', value: year },
     { label: 'Ort', value: project.ort },
     { label: 'Auftraggeber', value: project.auftraggeber },
     { label: 'Fläche', value: project.flaeche },
@@ -92,6 +120,11 @@ export default function ProjectDetail() {
       {/* Hero image — aligned to text column, touching the header; back link overlaid */}
       {hasImage ? (
         <div style={{ position: 'relative', padding: isMobile ? 0 : `0 ${hPad}px` }}>
+          {isMobile && (
+            <div style={{ padding: `4px ${hPad}px 6px` }}>
+              {backLink}
+            </div>
+          )}
           {isMobile ? (
             <img
               src={project.image}
@@ -113,9 +146,11 @@ export default function ProjectDetail() {
               </div>
             </div>
           )}
-          <div style={{ position: 'absolute', top: 20, left: hPad }}>
-            {backLink}
-          </div>
+          {!isMobile && (
+            <div style={{ position: 'absolute', top: 20, left: hPad }}>
+              {backLink}
+            </div>
+          )}
         </div>
       ) : (
         <div style={{
@@ -142,7 +177,7 @@ export default function ProjectDetail() {
         {!isMobile && (
           <div style={{ gridColumn: '1 / span 1', gridRow: '1', paddingTop: 4 }}>
             <span style={{
-              fontSize: 13,
+              fontSize: 14,
               color: A.mute,
             }}>
               Projekt
@@ -168,12 +203,11 @@ export default function ProjectDetail() {
           {project.ergebnis && (
             <div style={{
               display: 'inline-block',
-              marginBottom: 8,
-              fontSize: 12,
+              marginBottom: 12,
+              fontSize: 16,
               color: A.mute,
-              background: A.ruleSoft,
-              padding: '3px 8px',
-              borderRadius: 2,
+              border: `1px solid ${A.rule}`,
+              padding: '5px 12px',
             }}>
               {project.ergebnis}
             </div>
@@ -239,25 +273,6 @@ export default function ProjectDetail() {
             </p>
           )}
 
-          {/* Link to WordPress */}
-          {project.wpLink && (
-            <div style={{ marginTop: 32 }}>
-              <a
-                href={project.wpLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontSize: 14,
-                  color: A.mute,
-                  textDecoration: 'none',
-                  borderBottom: `1px solid ${A.rule}`,
-                  paddingBottom: 2,
-                }}
-              >
-                Zum Artikel →
-              </a>
-            </div>
-          )}
         </div>
       </div>
 

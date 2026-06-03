@@ -128,7 +128,7 @@ export default function Home() {
       }}>
         <div style={{
           gridColumn: labelCol,
-          fontSize: 13, color: A.mute,
+          fontSize: 14, color: A.mute,
         }}>
           01 /<br />Über uns
         </div>
@@ -173,7 +173,7 @@ export default function Home() {
       }}>
         <div style={{
           gridColumn: labelCol,
-          fontSize: 13, color: A.mute,
+          fontSize: 14, color: A.mute,
         }}>
           02 / Aktuell
         </div>
@@ -209,7 +209,7 @@ export default function Home() {
       }}>
         <div style={{
           gridColumn: labelCol,
-          fontSize: 13, color: A.mute,
+          fontSize: 14, color: A.mute,
         }}>
           03 / Notiz
         </div>

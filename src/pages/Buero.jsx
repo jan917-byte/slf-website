@@ -157,7 +157,7 @@ export default function Buero() {
       }}>
         <div style={{
           gridColumn: labelCol,
-          fontSize: 13,
+          fontSize: 14,
           color: A.mute,
         }}>
           01 /<br />Büro
@@ -247,7 +247,7 @@ export default function Buero() {
         }}>
           <div style={{
             gridColumn: labelCol,
-            fontSize: 12,
+            fontSize: 13,
             color: A.mute,
           }}>
             02 /<br />Leistungen
@@ -319,7 +319,7 @@ export default function Buero() {
       }}>
         <div style={{
           gridColumn: labelCol,
-          fontSize: 13,
+          fontSize: 14,
           color: A.mute,
         }}>
           03 /<br />Team
@@ -339,16 +339,16 @@ export default function Buero() {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 10,
-              fontSize: 14,
+              gap: 12,
+              fontSize: isMobile ? 17 : 20,
               color: A.ink,
               borderBottom: `1px solid ${A.ink}`,
-              paddingBottom: 3,
+              paddingBottom: 4,
               fontWeight: 600,
             }}
           >
             Unser Team kennenlernen
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="2" y1="7" x2="12" y2="7"/>
               <polyline points="8,3 12,7 8,11"/>
             </svg>

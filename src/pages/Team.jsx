@@ -89,18 +89,18 @@ function Modal({ member, onClose }) {
 
             {member.email ? (
               <a href={`mailto:${member.email}`} style={{ color: A.ink, textDecoration: 'none' }}>
-                <div style={{ fontSize: 22, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+                <div style={{ fontSize: 26, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
                   {member.name}
                 </div>
               </a>
             ) : (
-              <div style={{ fontSize: 22, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+              <div style={{ fontSize: 26, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
                 {member.name}
               </div>
             )}
 
             <div style={{
-              fontSize: 14, color: A.mute, marginTop: 6,
+              fontSize: 15, color: A.mute, marginTop: 6,
               lineHeight: 1.5, marginBottom: 20,
             }}>
               {member.ausbildung}
@@ -110,11 +110,11 @@ function Modal({ member, onClose }) {
               {member.cv.map(([jahre, text]) => (
                 <div key={jahre} style={{
                   display: 'flex', gap: 14,
-                  fontSize: 14, lineHeight: 1.65, color: A.mute,
+                  fontSize: 15, lineHeight: 1.65, color: A.mute,
                 }}>
                   <span style={{
                     minWidth: 84, flexShrink: 0,
-                    color: A.mute, fontSize: 13,
+                    color: A.mute, fontSize: 14,
                   }}>
                     {jahre}
                   </span>
@@ -123,7 +123,7 @@ function Modal({ member, onClose }) {
               ))}
             </div>
 
-            <div style={{ fontSize: 14, color: A.mute, lineHeight: 1.65 }}>
+            <div style={{ fontSize: 15, color: A.mute, lineHeight: 1.65 }}>
               <span style={{ color: A.ink }}>Aufgabenfelder — </span>
               {member.aufgaben}
             </div>
@@ -168,15 +168,15 @@ function TeamCard({ member, onClick }) {
 
       <div style={{ paddingTop: 10 }}>
         <div style={{
-          fontSize: 18, fontWeight: 600,
+          fontSize: 20, fontWeight: 600,
           letterSpacing: '-0.005em', color: A.ink,
           lineHeight: 1.3,
         }}>
           {member.name}
         </div>
         <div style={{
-          fontSize: 13, color: A.mute,
-          marginTop: 4,
+          fontSize: 14, color: A.mute,
+          marginTop: 5,
         }}>
           {member.rolle}
         </div>
@@ -213,7 +213,7 @@ export default function Team() {
           </div>
           <div style={{ gridColumn: isMobile ? 'auto' : '3 / span 8' }}>
             <h1 style={{
-              fontWeight: 600, fontSize: isMobile ? 23 : 32,
+              fontWeight: 600, fontSize: isMobile ? 26 : 36,
               letterSpacing: '-0.015em', margin: 0,
             }}>
               Das Team

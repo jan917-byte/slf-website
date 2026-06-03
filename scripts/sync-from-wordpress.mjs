@@ -24,6 +24,15 @@ const CATEGORY_LABEL = {
   verfahrensbetreuung: 'Verfahrensbetreuung',
 };
 
+// Fallback values keyed by WP slug, used ONLY when auto-extraction yields
+// nothing. WordPress stays the source of truth (so a value updated in WP wins);
+// these just guarantee a known-correct value survives a transient fetch failure
+// for projects whose prize lives only in the theme title, not the Verfahren field.
+const FALLBACKS = {
+  // Leipzig won 1. Preis (in the page <h3> title, absent from the Verfahren field).
+  'wettbewerb-leipzig': { ergebnis: '1. Preis' },
+};
+
 function decodeHtmlEntities(str) {
   return str
     .replace(/­/g, '')       // soft hyphens inserted by WordPress
@@ -80,32 +89,43 @@ const PRIZE_SUFFIX_RE = /\s*[–\-]\s*(\d+\.?\s*Preis|Ankauf|Anerkennung)\s*$/i;
 // Fetches the WP theme-rendered page and extracts the display title (h3) and
 // subtitle (div.info). The theme shows these from custom WP fields not exposed
 // in the REST API. Returns { titel, untertitel, ergebnis } or null on failure.
-async function fetchWpPageData(url) {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    if (!res.ok) return null;
-    const html = await res.text();
-    const m = html.match(/<h3>(.*?)<\/h3>\s*<div class="info">(.*?)<\/div>/s);
-    if (!m) return null;
+async function fetchWpPageData(url, attempts = 3) {
+  // The page carries the prize/subtitle only in the theme-rendered <h3>/<div class="info">,
+  // not in the REST API. A transient fetch failure here silently drops that data (and the
+  // prize for projects whose Verfahren field has no prize — e.g. Leipzig), so retry on
+  // network errors before giving up.
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const html = await res.text();
+      const m = html.match(/<h3>(.*?)<\/h3>\s*<div class="info">(.*?)<\/div>/s);
+      if (!m) return null; // page reached but has no display block — legitimately empty
 
-    const h3Raw = m[1].replace(/<[^>]+>/g, '').trim();
-    const infoRaw = m[2].replace(/<[^>]+>/g, '').trim();
+      const h3Raw = m[1].replace(/<[^>]+>/g, '').trim();
+      const infoRaw = m[2].replace(/<[^>]+>/g, '').trim();
 
-    const prizeH3 = h3Raw.match(PRIZE_SUFFIX_RE);
-    const prizeInfo = infoRaw.match(PRIZE_SUFFIX_RE);
+      const prizeH3 = h3Raw.match(PRIZE_SUFFIX_RE);
+      const prizeInfo = infoRaw.match(PRIZE_SUFFIX_RE);
 
-    return {
-      titel: decodeHtmlEntities(prizeH3 ? h3Raw.slice(0, prizeH3.index).trim() : h3Raw),
-      untertitel: decodeHtmlEntities(prizeInfo ? infoRaw.slice(0, prizeInfo.index).trim() : infoRaw),
-      ergebnis: prizeH3
-        ? normalizeErgebnis(prizeH3[1])
-        : prizeInfo
-          ? normalizeErgebnis(prizeInfo[1])
-          : null,
-    };
-  } catch {
-    return null;
+      return {
+        titel: decodeHtmlEntities(prizeH3 ? h3Raw.slice(0, prizeH3.index).trim() : h3Raw),
+        untertitel: decodeHtmlEntities(prizeInfo ? infoRaw.slice(0, prizeInfo.index).trim() : infoRaw),
+        ergebnis: prizeH3
+          ? normalizeErgebnis(prizeH3[1])
+          : prizeInfo
+            ? normalizeErgebnis(prizeInfo[1])
+            : null,
+      };
+    } catch (err) {
+      if (attempt === attempts) {
+        console.warn(`⚠️   Page fetch failed after ${attempts} attempts: ${url} (${err.message})`);
+        return null;
+      }
+      await new Promise(r => setTimeout(r, 500 * attempt)); // backoff before retry
+    }
   }
+  return null;
 }
 
 // ─── Elementor layout parser ─────────────────────────────────────────────────
@@ -344,6 +364,7 @@ function mapPost(post, pageData = null) {
   const imageUrl = pickImageUrl(featuredMedia);
   const beschreibung = stripHtml(post.excerpt?.rendered ?? post.content?.rendered ?? '');
   const content = extractLayout(post.content?.rendered ?? null);
+  const fallbacks = FALLBACKS[post.slug] ?? {};
 
   return {
     id: post.slug,
@@ -351,7 +372,7 @@ function mapPost(post, pageData = null) {
     untertitel: pageData?.untertitel ?? '',
     beschreibung,
     content,
-    ergebnis: pageData?.ergebnis || extractVerfahrenResult(content),
+    ergebnis: pageData?.ergebnis || extractVerfahrenResult(content) || fallbacks.ergebnis || null,
     ort: null,
     jahr: extractZeitraum(post.content?.rendered ?? null),
     kategorie: matchedTerms.map(t => CATEGORY_LABEL[t.slug]),
@@ -384,10 +405,17 @@ async function main() {
 
   console.log(`    Fetched ${posts.length} published posts`);
 
-  // Fetch WP page HTML for all posts in parallel to get display titles and prizes
-  // that are stored in theme custom fields not exposed by the REST API.
+  // Fetch WP page HTML to get display titles and prizes stored in theme custom
+  // fields not exposed by the REST API. Throttle to small batches — firing all
+  // requests at once overwhelms the slow WP server and causes timeouts that
+  // silently drop prizes (see fetchWpPageData).
   console.log('    Fetching page display data…');
-  const pageDataArr = await Promise.all(posts.map(p => fetchWpPageData(p.link)));
+  const BATCH = 8;
+  const pageDataArr = [];
+  for (let i = 0; i < posts.length; i += BATCH) {
+    const batch = posts.slice(i, i + BATCH);
+    pageDataArr.push(...await Promise.all(batch.map(p => fetchWpPageData(p.link))));
+  }
 
   const projects = posts
     .map((post, i) => mapPost(post, pageDataArr[i]))

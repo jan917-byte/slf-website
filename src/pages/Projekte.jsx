@@ -237,7 +237,7 @@ export default function Projekte() {
                     </div>
                   )}
                   {isMobile && (
-                    <div style={{ fontSize: 13, color: A.mute }}>
+                    <div style={{ fontSize: 14, color: A.mute }}>
                       {[].concat(p.kategorie).join(' / ')} · {p.jahr ?? ''}
                     </div>
                   )}
@@ -263,7 +263,7 @@ export default function Projekte() {
               <ProjectImage proj={p} ratio="4/3" title={p.titel} subtitle={p.untertitel} ergebnis={p.ergebnis} />
               <div style={{
                 marginTop: 12, display: 'flex', justifyContent: 'space-between',
-                fontSize: 13, color: A.mute,
+                fontSize: 14, color: A.mute,
               }}>
                 <span>{[].concat(p.kategorie).join(' / ')}</span>
                 <span>{p.jahr ?? (p.wpDate ? new Date(p.wpDate).getFullYear() : null)}</span>
