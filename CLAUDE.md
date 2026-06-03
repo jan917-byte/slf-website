@@ -50,9 +50,14 @@ Two named exports used everywhere:
 
 Primary font: **D-DIN** loaded via CDN in `index.html`. Fallback chain: `"DIN Next LT Pro", "DIN Pro", "Barlow", sans-serif`.
 
-- Section labels: 11px, uppercase, `letterSpacing: '0.12em'`, `accentDeep`
-- Project meta: 11px, uppercase, `letterSpacing: '0.08–0.1em'`
+- Section labels: 11px, `letterSpacing: '0.12em'`
+- Project meta: 11px, `letterSpacing: '0.08–0.1em'`
 - Titles: `fontWeight: 400`, `letterSpacing: '-0.015em'`
+
+#### Style conventions (apply everywhere)
+
+- **No uppercase text** — do not use `textTransform: 'uppercase'`. Labels keep their natural casing.
+- **No khaki text** — do not use `accent` / `accentDeep` (`#ccc8a6` / `#8a8765`) as a text color. Use `ink` for primary and `mute` for secondary text. The khaki tokens are reserved for non-text accents only.
 
 ### Layout conventions
 

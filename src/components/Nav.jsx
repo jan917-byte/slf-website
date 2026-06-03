@@ -205,14 +205,23 @@ export default function Nav() {
                       onMouseLeave={() => setHoveredLabel(null)}
                       style={{
                         color: (active || isHovered) ? A.ink : A.mute,
-                        borderBottom: (active || isHovered) ? `3px solid ${A.accent}` : '3px solid transparent',
                         paddingBottom: 4,
                         fontWeight: active ? 600 : 500,
                         letterSpacing: '0.01em',
                         display: 'block',
-                        transition: 'border-color 0.15s ease, color 0.15s ease',
+                        position: 'relative',
+                        transition: 'color 0.15s ease',
                       }}>
                       {label}
+                      <span style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        height: 3,
+                        width: (active || isHovered) ? '100%' : '0%',
+                        background: A.accent,
+                        transition: 'width 0.2s ease',
+                      }} />
                     </Link>
 
                     {children && (

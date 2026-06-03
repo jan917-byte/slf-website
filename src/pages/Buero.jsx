@@ -255,7 +255,6 @@ export default function Buero() {
           </div>
           <div style={{ gridColumn: contentCol }}>
             <h2 style={{
-              fontWeight: 400,
               fontWeight: 500,
               fontSize: isMobile ? 20 : 26,
               letterSpacing: '-0.015em',

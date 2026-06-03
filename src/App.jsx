@@ -28,7 +28,7 @@ function ScrollToTop() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ScrollToTop />
       <div style={{ maxWidth: 1400, margin: '0 auto', background: '#fff' }}>
         <Routes>

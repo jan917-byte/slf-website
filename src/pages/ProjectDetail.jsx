@@ -25,15 +25,24 @@ const PROSE_STYLES = `
 .slf-prose .slf-col-66 { flex: 2 1 0; min-width: 0; }
 .slf-prose .slf-col-100 { flex: 1 0 100%; }
 @media (max-width: 640px) { .slf-prose .slf-row { flex-direction: column; } .slf-prose .slf-row > * { width: 100% !important; } }
-.slf-prose .slf-daten-heading { font-size: 13px; font-weight: 600; color: #0e0e10; margin: 2em 0 0.5em; line-height: 1; }
-.slf-prose .slf-daten { margin: 0; border-bottom: 1px solid #e6e5e2; }
-.slf-prose .slf-daten dt { font-size: 12px; font-weight: 600; color: #6b6b6e; border-top: 1px solid #e6e5e2; padding: 8px 0 2px; margin: 0; }
-.slf-prose .slf-daten dd { font-size: 13px; color: #0e0e10; padding: 0 0 8px; margin: 0; line-height: 1.5; overflow-wrap: break-word; }
+.slf-prose .slf-daten-heading { font-size: 15px; font-weight: 600; color: #0e0e10; margin: 2.6em 0 14px; line-height: 1; }
+.slf-prose .slf-daten { margin: 0; display: grid; grid-template-columns: minmax(150px, 220px) 1fr; border-top: 1px solid #0e0e10; }
+.slf-prose .slf-daten dt { font-size: 14px; font-weight: 500; color: #6b6b6e; padding: 16px 20px 16px 0; margin: 0; border-bottom: 1px solid #e6e5e2; }
+.slf-prose .slf-daten dd { font-size: 18px; color: #0e0e10; padding: 16px 0; margin: 0; line-height: 1.4; border-bottom: 1px solid #e6e5e2; overflow-wrap: break-word; }
+@media (max-width: 640px) { .slf-prose .slf-daten { grid-template-columns: 1fr; } .slf-prose .slf-daten dt { padding: 14px 0 2px; border-bottom: none; } .slf-prose .slf-daten dd { font-size: 17px; padding: 0 0 14px; border-bottom: 1px solid #e6e5e2; } }
 `
 
 // Remove dt/dd pairs where the dd value is empty or whitespace-only.
+// Remove slf-rows where every column after the first contains only whitespace.
 function processContent(html) {
-  return html.replace(/<dt>[^<]*<\/dt><dd>\s*<\/dd>/g, '');
+  let out = html.replace(/<dt>[^<]*<\/dt><dd>\s*<\/dd>/g, '');
+  out = out.replace(/<div class="slf-row">((?:<div class="slf-col-\d+">[\s\S]*?<\/div>)+)<\/div>/g, (match, inner) => {
+    const cols = [...inner.matchAll(/<div class="slf-col-\d+">([\s\S]*?)<\/div>/g)];
+    const contentCols = cols.slice(1);
+    const allEmpty = contentCols.length > 0 && contentCols.every(c => !c[1].trim());
+    return allEmpty ? '' : match;
+  });
+  return out;
 }
 
 export default function ProjectDetail() {

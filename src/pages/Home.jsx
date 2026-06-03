@@ -20,12 +20,12 @@ const featured = FEATURED_IDS.map(id => projects.find(p => p.id === id)).filter(
 
 const LEISTUNGEN = [
   {
-    titel: 'Konzeptionell',
-    beschreibung: 'Strategische Stadtplanung, Machbarkeitsstudien, Wettbewerbsteilnahmen und Partizipationsverfahren.',
+    titel: 'Quartiersentwicklung',
+    beschreibung: 'Strategische Stadtentwicklung, Machbarkeitsstudien, integrierte Konzepte und Partizipationsverfahren.',
   },
   {
     titel: 'Städtebau',
-    beschreibung: 'Städtebauliche Entwürfe, Quartiersentwicklung und Gestaltungskonzepte für urbane Räume.',
+    beschreibung: 'Städtebauliche Entwürfe, Rahmenplanungen und Gestaltungskonzepte für urbane Räume.',
   },
   {
     titel: 'Bauleitplanung',
@@ -83,19 +83,20 @@ export default function Home() {
                 alignItems: 'center', justifyContent: 'center',
                 padding: 24,
               }}>
-                <div style={{ width: 28, height: 3, background: A.accent, marginBottom: 14 }} />
+                <div style={{ width: 32, height: 3, background: A.accent, marginBottom: 18 }} />
                 <div style={{
-                  fontSize: isMobile ? 17 : 22,
+                  fontSize: isMobile ? 22 : 32,
                   fontWeight: 400, color: '#fff',
-                  letterSpacing: '-0.01em', textAlign: 'center',
+                  letterSpacing: '-0.02em', textAlign: 'center',
+                  lineHeight: 1.15,
                 }}>
                   {LEISTUNGEN[seg.li].titel}
                 </div>
                 <div style={{
-                  fontSize: isMobile ? 13 : 14,
-                  color: 'rgba(255,255,255,0.65)',
-                  marginTop: 10, lineHeight: 1.5,
-                  textAlign: 'center', maxWidth: 200,
+                  fontSize: isMobile ? 14 : 16,
+                  color: 'rgba(255,255,255,0.82)',
+                  marginTop: 14, lineHeight: 1.55,
+                  textAlign: 'center', maxWidth: 240,
                 }}>
                   {LEISTUNGEN[seg.li].beschreibung}
                 </div>
