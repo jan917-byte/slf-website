@@ -51,7 +51,7 @@ export default function Home() {
 
   // Hero scales proportionally so objectFit:cover never crops the sides (which misaligns hover segments)
   const heroContainerWidth = width - 2 * hPad
-  const heroHeight = isMobile ? 280 : Math.min(660, Math.round(heroContainerWidth * (1423 / 2110)))
+  const heroHeight = Math.min(isMobile ? 420 : 660, Math.round(heroContainerWidth * (1423 / 2110)))
 
   // Compute overlay title font size to fit "Quartiersentwicklung" (20 chars) on one line
   const heroPad = hPad * 2
@@ -126,7 +126,7 @@ export default function Home() {
 
       {/* Intro */}
       <div style={{
-        padding: `${vPad}px ${hPad}px ${isMobile ? 40 : 56}px`,
+        padding: `${isMobile ? 32 : vPad}px ${hPad}px ${isMobile ? 40 : 56}px`,
         display: 'grid', gridTemplateColumns: gridCols, gap: 24,
       }}>
         <div style={{
