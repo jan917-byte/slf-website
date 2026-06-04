@@ -76,7 +76,7 @@ function GalleryFigure({ src, caption, shape }) {
             width: '100%',
             height: '100%',
             opacity: hover ? 1 : 0,
-            transition: 'opacity 0.25s ease',
+            transition: 'opacity 0.4s ease-in',
             pointerEvents: 'none',
           }}
         >
