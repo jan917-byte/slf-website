@@ -105,16 +105,20 @@ All components use the `useWindowWidth()` hook (`src/hooks/useWindowWidth.js`) �
 
 **`src/components/Nav.jsx`** — sticky nav with:
 - Desktop: hover-activated dropdown panels (120ms close delay via `closeTimer` ref)
-- Mobile (< 768px): hamburger → full-screen overlay
-- Active state: `pathname` match highlights link with `accent` underline
-- Nav items and dropdown children defined in the `navItems` array at the top of `Nav.jsx`. Projekte dropdown items generated from `PROJEKTE_NAV` in `src/data/filters.js`.
+- Mobile (< 768px): hamburger → full-screen overlay (links only; no dropdown children)
+- Active state: `pathname` match changes link color from `mute` → `ink`; all top-level nav links use `fontWeight: 600` regardless of active state
+- Underline accent: absolutely-positioned `<span>` slides in on hover and active (`width: 0 → 100%`, 0.2s ease, height 3px, `A.accent`)
+- Nav items and dropdown children defined in the `navItems` array at the top of `Nav.jsx`. Projekte dropdown items generated from `PROJEKTE_NAV` in `src/data/filters.js`. Büro dropdown: "Leistungen" links to `/buero#leistungen` (hash anchor, handled by `ScrollToTop`)
+- **Search** — search icon on both desktop (right of nav) and mobile (left of hamburger). Opens a full-screen overlay (zIndex 400) with an input field, live results as the user types (min 2 chars), up to 10 matching projects. Searches `titel`, `beschreibung`, `kategorie`. Closes on Esc or × button. Implemented via `<SearchButton>`, `<SearchResult>` sub-components.
+- **Logo intro animation** — on first full page load (not client-side navigation), the wordmark plays a staggered Stadt → Land → Fluss reveal (`slfWordIn` keyframe, 0.55s, delays 0.08 / 0.26 / 0.44s). Controlled by the module-level `logoIntroDone` flag. Respects `prefers-reduced-motion`.
 
-**`src/components/Footer.jsx`** — 4-column grid (logo/partners | address | navigation | legal). Collapses to 2-col on tablet (< 1024px), 1-col on mobile.
+**`src/components/Footer.jsx`** — 4-column grid (logo/partners | address | navigation | legal). Collapses to 2-col on tablet (< 1024px), 1-col on mobile. Navigation column includes an external link to competitionline. Logo imported from `src/assets/SLF_Logo.svg` (distinct from the public/ logos). Hover underlines via CSS class `footer-nav-link` (injected via `<style>`).
 
 **`src/components/ProjectImage.jsx`** — reusable image tile with:
-- Props: `proj`, `ratio` (`'16/10'|'4/3'|'3/2'|'1/1'`), `title`, `style`
+- Props: `proj`, `ratio` (`'16/10'|'4/3'|'3/2'|'1/1'`), `title`, `subtitle`, `ergebnis`, `style`
 - Aspect ratio via padding-top percentage. Striped placeholder background while no image (diagonal for `tone:'photo'`, vertical for `tone:'plan'`).
-- Hover: image scale(1.03) + dark gradient overlay + optional title fade-in.
+- Hover: image scale(1.03) + dark gradient overlay + optional title/subtitle/ergebnis fade-in.
+- Title/subtitle font sizes are responsive via `useWindowWidth()`: 20/15px (≥ 1024px), 17/13px (640–1023px), 15/12px (< 640px).
 
 **`src/components/ProjectFeedItem.jsx`** — single project row for the Projekte list view.
 
@@ -124,11 +128,12 @@ All components use the `useWindowWidth()` hook (`src/hooks/useWindowWidth.js`) �
 
 **`src/pages/Team.jsx`** — dedicated team page at `/buero/team`. Renders `TEAM` from `src/data/team.js` as a responsive photo grid (`<TeamCard>`). Clicking a card opens a `<Modal>` overlay with full bio (photo + CV timeline + Aufgabenfelder). Modal closes on Esc, outside click, or × button. Grid columns: 2 (< 640px) / 3 (640–1023px) / 4 (≥ 1024px).
 
-**`src/pages/Buero.jsx`** — single-page layout, three numbered sections:
-- **01 / Büro** — intro text (from WP page ID 18) + 3-image gallery (Stadt / Land / Wasser, WP CDN URLs)
-- **02 / Leistungen** — `LEISTUNGEN` array (8 services), rendered as a 2-column grid spanning cols 3–11
-- **03 / Team** — inline preview of partners; links to `/buero/team` for the full team page.
-- **Closing image** — full-width office photo at the bottom (WP CDN), followed by `<BackToTop />` then `<Footer />`.
+**`src/pages/Buero.jsx`** — single-page layout:
+- **Hero image** — office photo (WP CDN) at the top, with side padding 36px desktop / 12px mobile (not full-width), `objectPosition: 'center 30%'`, height 500px desktop / 220px mobile.
+- **01 / Büro** — hardcoded intro text (two paragraphs) + 3-image gallery (Stadt / Land / Wasser, WP CDN URLs, aspect-ratio 4/3, `objectFit: cover`)
+- **02 / Leistungen** — `LEISTUNGEN` array (8 services), each with an inline SVG icon, rendered as a 2-column grid spanning cols 3–11 (`3 / span 9`). Section anchored at `id="leistungen"` for hash navigation.
+- **03 / Team** — brief text + "Unser Team kennenlernen →" link to `/buero/team`.
+- **Closing image** — office photo (WP CDN) with the same side padding (36px / 12px), followed by `<BackToTop />` then `<Footer />`.
 
 **`src/pages/Kontakt.jsx`** — contact info (address + phone/email) in cols 3–6, then a full-width `<Anfahrt>` section with a local SVG map (`public/anfahrt_karte.svg`, served via `import.meta.env.BASE_URL`).
 
@@ -146,7 +151,7 @@ Fields per project object:
 ```
 id (WP slug), titel, untertitel (''), beschreibung (WP excerpt stripped),
 ort (null), jahr (string|null extracted from Projektdaten), kategorie,
-flaeche (null), auftraggeber (null),
+flaeche (null), auftraggeber (null), ergebnis (string|null — competition result, e.g. "1. Preis"),
 tone ('photo'|'plan'), image (WP featured media URL or null),
 content (layout-preserving HTML, see below),
 wpId, wpDate, wpLink
@@ -191,6 +196,13 @@ These classes are styled in the `PROSE_STYLES` constant in `src/pages/ProjectDet
 
 Responsive column count: `< 640px` → 1 col · `640–1023px` → 2 cols · `≥ 1024px` → 3 cols.
 
+### Home page (`src/pages/Home.jsx`)
+
+Three sections after the hero:
+- **01 / Über uns** — intro text (hardcoded), 2 paragraphs
+- **02 / Aktuell** — "Ausgewählte Projekte" feed: 6 hardcoded project IDs in `FEATURED_IDS`, rendered as alternating left/right `<ProjectFeedItem>` rows (first item `large={true}`)
+- **03 / Notiz** — short note about the leadership transition to the three current partners
+
 ### Hero hover interaction (`src/pages/Home.jsx`)
 
 The hero image (`deckblatt-homepage-v3.jpg`) is a composite JPG of 3 sub-images with white gaps. Five absolutely-positioned flex segments (3 hotspots + 2 gap spacers) map to `LEISTUNGEN[0–2]`. `hoveredLeistung` state drives overlay opacity.
@@ -212,8 +224,10 @@ Hero overlay text sizing is computed dynamically: `titleFontSize = Math.min(max,
 ### Project detail page (`src/pages/ProjectDetail.jsx`)
 
 Route: `/projekte/:id`. Layout:
-- **Hero image** — full-bleed width, aligned to text column (cols 3–10), touches the nav. `← Alle Projekte` overlaid at `top: 20px, left: 56px`.
-- **Content** — rendered via `dangerouslySetInnerHTML` from `project.content`. All transforms done at sync time.
+- **Hero image** — desktop: aligned to text column (`gridColumn: '3 / span 8'`, cols 3–10) within the 12-col grid, `← Alle Projekte` overlaid at `top: 20px, left: 56px`. Mobile: full-width, back link displayed above the image.
+- **Title** — `fontWeight: 700`, 38px desktop / 26px mobile, `letterSpacing: '-0.02em'`
+- **Ergebnis badge** — if `project.ergebnis` is set, shown as a bordered inline tag below the title.
+- **Content** — passed through `processContent()` before `dangerouslySetInnerHTML`. `processContent()` does three things: (1) strips empty `<dt>/<dd>` pairs, (2) merges "Mehr Informationen" slf-rows into the preceding `<dl class="slf-daten">` (or creates a new one), (3) removes slf-rows where every column after the first is empty. Bare URLs in "Mehr Informationen" are auto-linked.
 - **Prev/Next navigation** — links to adjacent projects by index in `projects` array.
 
 ## Design tooling
@@ -247,6 +261,8 @@ Exports: `window.{DesignCanvas, DCSection, DCArtboard, DCPostIt}`.
 | `public/anfahrt_karte.svg` | Anfahrt map on Kontakt page (local copy, not WP CDN) |
 | `public/SLF_Logo_notext.svg` | Logo without text (light version) |
 | `public/SLF_Logo_notext_b.svg` | Logo without text (dark/bold version) |
+| `src/assets/SLF_Logo.svg` | Full logo with text — imported by `Footer.jsx` (Vite asset, not a `public/` file) |
+| `src/assets/SLF_Logo_Lang.svg` | Long/horizontal logo — imported raw by `Nav.jsx` (`?raw` import, injected as inline SVG) |
 
 Always serve static assets via `import.meta.env.BASE_URL + 'filename'` so the path resolves correctly when deployed to a subdirectory. `import.meta.env.BASE_URL` resolves to `/slf-website/` (configured in `vite.config.js` as `base: '/slf-website/'`).
 

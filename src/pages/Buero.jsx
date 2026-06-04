@@ -6,6 +6,108 @@ import Footer from '../components/Footer'
 import BackToTop from '../components/BackToTop'
 import { useWindowWidth } from '../hooks/useWindowWidth'
 
+const prefersReducedMotion =
+  typeof window !== 'undefined' &&
+  window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+// Logo-glyph reveal masks for the Büro gallery. The three SLF logo shapes
+// (rectangle = Stadt, pill = Land, wave = Wasser) are extracted verbatim from
+// public/SLF_Logo_notext_b.svg with their original matrix. Each glyph is then
+// centered + scaled (~72%) into a 4:3 frame (1828×1371) so it sits inside the
+// 4/3 photo without distortion.
+const GLYPH_MATRIX = 'matrix(17.361113,0,0,17.361113,-557.153936,-449.619899)'
+const MASK_SHAPES = {
+  rect: {
+    center: 'translate(99.13,403.76) scale(0.903)',
+    el: <rect x="42.12" y="34.649" width="83.906" height="18.434" fill={A.accent} />,
+  },
+  pill: {
+    center: 'translate(97.87,-101.16) scale(0.904)',
+    el: (
+      <path
+        fill={A.accent}
+        d="M116.662,66.807C116.624,66.807 116.587,66.812 116.548,66.812L51.744,66.812C51.672,66.811 51.601,66.802 51.529,66.802C51.457,66.802 51.387,66.811 51.315,66.812L51.062,66.812L51.062,66.825C46.118,67.066 42.183,71.083 42.183,76.02C42.183,80.955 46.118,84.973 51.062,85.214L51.062,85.238L116.619,85.238L116.619,85.236C116.633,85.236 116.648,85.238 116.662,85.238C121.823,85.238 126.006,81.112 126.006,76.022C126.006,70.932 121.823,66.807 116.662,66.807Z"
+      />
+    ),
+  },
+  wave: {
+    center: 'translate(122.90,-547.06) scale(0.868)',
+    el: (
+      <path
+        fill={A.accent}
+        d="M102.286,120.136C101.784,120.136 101.278,120.13 100.765,120.12C93.346,120.348 86.989,117.655 81.354,115.271C76.742,113.319 72.761,111.628 69.006,111.723C61.131,112.469 59.494,113.183 50.478,119.58L40.93,106.124C51.757,98.442 56.038,96.363 67.711,95.272L68.14,95.243C75.636,94.932 82.089,97.666 87.784,100.077C92.483,102.064 96.538,103.78 100.358,103.624L100.613,103.614L100.868,103.619C105.51,103.71 108.559,103.776 119.25,96.82L128.248,110.65C115.409,119.004 109.226,120.136 102.286,120.136Z"
+      />
+    ),
+  },
+}
+
+function GalleryFigure({ src, caption, shape }) {
+  const [hover, setHover] = useState(false)
+  const s = MASK_SHAPES[shape]
+  return (
+    <figure
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{ margin: 0 }}
+    >
+      {/* image-only wrapper so the khaki shape never overlaps the caption below */}
+      <div style={{ position: 'relative', lineHeight: 0 }}>
+        <img
+          src={src}
+          alt={caption}
+          style={{
+            display: 'block',
+            width: '100%',
+            aspectRatio: '4 / 3',
+            objectFit: 'cover',
+          }}
+        />
+        {/* Khaki glyph starts oversized (covers corners) and retracts to its
+            centered size — the colour gathers from the corners into the shape. */}
+        <svg
+          viewBox="0 0 1828 1371"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            opacity: hover ? 1 : 0,
+            transition: 'opacity 0.25s ease',
+            pointerEvents: 'none',
+          }}
+        >
+          <g transform={s.center}>
+            <g
+              style={{
+                transformBox: 'fill-box',
+                transformOrigin: 'center',
+                transform: `scale(${hover ? 1 : 7})`,
+                transition: prefersReducedMotion
+                  ? 'none'
+                  : 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            >
+              <g transform={GLYPH_MATRIX}>{s.el}</g>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <figcaption style={{
+        fontSize: 14,
+        color: A.mute,
+        marginTop: 8,
+        fontStyle: 'italic',
+      }}>
+        {caption}
+      </figcaption>
+    </figure>
+  )
+}
+
 const LEISTUNGEN = [
   {
     key: 'stadtentwicklung',
@@ -203,36 +305,20 @@ export default function Buero() {
             {
               src: 'https://www.slf-berlin.de/wordpress/wp-content/uploads/2024/07/img-7857-scaled-e1720599088182-860x625.jpg',
               caption: 'Immer in der Stadt …',
+              shape: 'rect',
             },
             {
               src: 'https://www.slf-berlin.de/wordpress/wp-content/uploads/2024/07/8c968187-cea8-4570-8e05-703808cb86d9-860x645.jpg',
               caption: '… auf dem Land …',
+              shape: 'pill',
             },
             {
               src: 'https://www.slf-berlin.de/wordpress/wp-content/uploads/2024/07/img-7862-860x645.jpg',
               caption: '… und am Wasser.',
+              shape: 'wave',
             },
-          ].map(({ src, caption }) => (
-            <figure key={src} style={{ margin: 0 }}>
-              <img
-                src={src}
-                alt={caption}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  aspectRatio: '4 / 3',
-                  objectFit: 'cover',
-                }}
-              />
-              <figcaption style={{
-                fontSize: 14,
-                color: A.mute,
-                marginTop: 8,
-                fontStyle: 'italic',
-              }}>
-                {caption}
-              </figcaption>
-            </figure>
+          ].map(({ src, caption, shape }) => (
+            <GalleryFigure key={src} src={src} caption={caption} shape={shape} />
           ))}
         </div>
       </div>

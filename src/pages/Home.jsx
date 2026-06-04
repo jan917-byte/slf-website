@@ -9,6 +9,7 @@ import heroBild from '../assets/deckblatt-homepage-v3.jpg'
 import { useWindowWidth } from '../hooks/useWindowWidth'
 
 const FEATURED_IDS = [
+  'umgestaltung-innenstadt-von-burloer-strasse-bis-rathausplatz-in-rhede',
   'wettbewerb-hafenareal-kassel',
   'innenentwicklungskonzepte-iek-berlin',
   'wettbewerbs-koordination-blankenburger-sueden-teilflaeche-sued',
