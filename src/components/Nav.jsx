@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import logoRaw from '../assets/SLF_Logo_Lang.svg?raw'
+import logoRaw from '../assets/SLF_Logo.svg?raw'
 import { tokens as A } from '../tokens'
 import { PROJEKTE_NAV, filterHref } from '../data/filters'
 import { useWindowWidth } from '../hooks/useWindowWidth'
@@ -98,7 +98,7 @@ export default function Nav() {
         return (
           p.titel?.toLowerCase().includes(q) ||
           p.beschreibung?.toLowerCase().includes(q) ||
-          p.kategorie?.toLowerCase().includes(q)
+          (Array.isArray(p.kategorie) ? p.kategorie : [p.kategorie]).some(k => k?.toLowerCase().includes(q))
         )
       }).slice(0, 10)
     : []
@@ -138,11 +138,11 @@ export default function Nav() {
         position: 'sticky', top: 0, zIndex: 100,
         background: A.bg,
         borderBottom: 'none',
-        padding: isMobile ? '20px 20px' : '24px 56px',
+        padding: isMobile ? '16px 20px' : '16px 56px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <Link to="/" style={{ display: 'inline-flex', alignItems: 'center' }}>
-          <Logo height={isMobile ? 18 : 24} intro={playIntro} />
+          <Logo height={isMobile ? 32 : 48} intro={playIntro} />
         </Link>
 
         {isMobile ? (
@@ -187,7 +187,7 @@ export default function Nav() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <Link to="/" onClick={() => setMobileOpen(false)} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                      <Logo height={18} />
+                      <Logo height={32} />
                     </Link>
                     <button
                       onClick={() => setMobileOpen(false)}
@@ -301,84 +301,90 @@ export default function Nav() {
         )}
       </div>
 
-      {/* Search overlay */}
+      {/* Search dropdown */}
       {searchOpen && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          zIndex: 400,
-          background: A.bg,
-          display: 'flex', flexDirection: 'column',
-        }}>
-          {/* Search input bar */}
+        <>
+          <div
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 399 }}
+            onClick={closeSearch}
+          />
           <div style={{
-            padding: isMobile ? '20px' : '24px 56px',
-            borderBottom: `1px solid ${A.rule}`,
-            display: 'flex', alignItems: 'center', gap: 16,
-            flexShrink: 0,
+            position: 'fixed',
+            top: isMobile ? 64 : 80,
+            left: isMobile ? 0 : 'auto',
+            right: isMobile ? 0 : 56,
+            width: isMobile ? 'auto' : 420,
+            zIndex: 400,
+            background: A.bg,
+            border: `1px solid ${A.rule}`,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+            display: 'flex', flexDirection: 'column',
+            maxHeight: 480,
           }}>
-            <SearchIcon size={20} color={A.mute} />
-            <input
-              ref={searchInputRef}
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Projekt suchen…"
-              autoComplete="off"
-              style={{
-                flex: 1,
-                border: 'none', outline: 'none',
-                fontSize: isMobile ? 18 : 19,
-                color: A.ink,
-                background: 'transparent',
-                fontFamily: 'inherit',
-                letterSpacing: '0.01em',
-              }}
-            />
-            <button
-              onClick={closeSearch}
-              aria-label="Suche schließen"
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <CloseIcon size={18} color={A.mute} />
-            </button>
-          </div>
-
-          {/* Results */}
-          <div style={{
-            overflowY: 'auto',
-            flex: 1,
-            padding: isMobile ? '16px 20px' : '16px 56px',
-          }}>
-            {searchQuery.trim().length > 1 && searchResults.length === 0 && (
-              <p style={{
-                color: A.mute, fontSize: 15,
-                marginTop: 32,
-              }}>
-                Keine Projekte gefunden.
-              </p>
-            )}
-
-            {searchQuery.trim().length <= 1 && (
-              <p style={{
-                color: A.mute, fontSize: 14,
-                marginTop: 32,
-              }}>
-                Projekttitel, Kategorie oder Beschreibung eingeben
-              </p>
-            )}
-
-            {searchResults.map((p, i) => (
-              <SearchResult
-                key={p.id}
-                project={p}
-                isLast={i === searchResults.length - 1}
-                onSelect={closeSearch}
+            {/* Input */}
+            <div style={{
+              padding: isMobile ? '14px 20px' : '14px 18px',
+              borderBottom: `1px solid ${A.rule}`,
+              display: 'flex', alignItems: 'center', gap: 12,
+              flexShrink: 0,
+            }}>
+              <SearchIcon size={18} color={A.mute} />
+              <input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Projekt suchen…"
+                autoComplete="off"
+                style={{
+                  flex: 1,
+                  border: 'none', outline: 'none',
+                  fontSize: isMobile ? 16 : 17,
+                  color: A.ink,
+                  background: 'transparent',
+                  fontFamily: 'inherit',
+                  letterSpacing: '0.01em',
+                }}
               />
-            ))}
+              <button
+                onClick={closeSearch}
+                aria-label="Suche schließen"
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <CloseIcon size={16} color={A.mute} />
+              </button>
+            </div>
+
+            {/* Results */}
+            <div style={{
+              overflowY: 'auto',
+              padding: isMobile ? '4px 20px 12px' : '4px 18px 12px',
+            }}>
+              {searchQuery.trim().length > 1 && searchResults.length === 0 && (
+                <p style={{ color: A.mute, fontSize: 14, margin: '16px 0' }}>
+                  Keine Projekte gefunden.
+                </p>
+              )}
+
+              {searchQuery.trim().length <= 1 && (
+                <p style={{ color: A.mute, fontSize: 13, margin: '16px 0' }}>
+                  Projekttitel, Kategorie oder Beschreibung eingeben
+                </p>
+              )}
+
+              {searchResults.map((p, i) => (
+                <SearchResult
+                  key={p.id}
+                  project={p}
+                  isLast={i === searchResults.length - 1}
+                  onSelect={closeSearch}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </>
   )
@@ -426,7 +432,7 @@ function SearchResult({ project, isLast, onSelect }) {
       <div style={{
         fontSize: 13, color: A.mute, fontWeight: 600, marginBottom: 5,
       }}>
-        {project.kategorie}
+        {Array.isArray(project.kategorie) ? project.kategorie.join(', ') : project.kategorie}
       </div>
       <div style={{ fontSize: 18, color: A.ink, fontWeight: 400, letterSpacing: '-0.01em', lineHeight: 1.3 }}>
         {project.titel}
