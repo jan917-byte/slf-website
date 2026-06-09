@@ -42,7 +42,7 @@ export default function ProjectImage({ proj, ratio = '4/3', title, subtitle, erg
       {/* accent overlay */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'rgba(204, 200, 166, 0.72)',
+        background: 'rgba(243,241,227,0.92)',
         opacity: hovered ? 1 : 0,
         transition: 'opacity 0.3s ease',
         pointerEvents: 'none',

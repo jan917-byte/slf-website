@@ -21,8 +21,8 @@ const featured = FEATURED_IDS.map(id => projects.find(p => p.id === id)).filter(
 
 const LEISTUNGEN = [
   {
-    titel: 'Quartiersentwicklung',
-    beschreibung: 'Strategische Stadtentwicklung, Machbarkeitsstudien, integrierte Konzepte und Partizipationsverfahren.',
+    titel: 'Stadtentwicklung',
+    beschreibung: 'Quartiersentwicklung, Machbarkeitsstudien, integrierte Konzepte und Partizipationsverfahren.',
   },
   {
     titel: 'Städtebau',
@@ -53,7 +53,7 @@ export default function Home() {
   const heroContainerWidth = width - 2 * hPad
   const heroHeight = Math.min(isMobile ? 420 : 660, Math.round(heroContainerWidth * (1423 / 2110)))
 
-  // Compute overlay title font size to fit "Quartiersentwicklung" (20 chars) on one line
+  // Compute overlay title font size to fit "Stadtentwicklung" (16 chars) on one line
   const heroPad = hPad * 2
   const overlayPad = isMobile ? 16 : 48
   const segContentWidth = (width - heroPad) * 0.3164 - overlayPad
@@ -89,30 +89,44 @@ export default function Home() {
               onMouseLeave={() => setHoveredLeistung(null)}
               style={{ flex: seg.flex, position: 'relative', cursor: 'default', overflow: 'hidden' }}
             >
+              {/* Background layer — fades in quickly */}
               <div style={{
                 position: 'absolute', inset: 0,
-                background: 'rgba(14,14,16,0.72)',
+                background: 'rgba(243,241,227,0.92)',
                 opacity: hoveredLeistung === seg.li ? 1 : 0,
-                transition: 'opacity 0.28s ease',
+                transition: 'opacity 0.2s ease',
+                pointerEvents: 'none',
+              }} />
+              {/* Text layer — slides up with stagger */}
+              <div style={{
+                position: 'absolute', inset: 0,
                 display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
                 padding: isMobile ? 8 : 24,
+                pointerEvents: 'none',
               }}>
-                <div style={{ width: 32, height: 3, background: A.accent, marginBottom: isMobile ? 10 : 18 }} />
                 <div style={{
                   fontSize: titleFontSize,
-                  fontWeight: 600, color: '#fff',
+                  fontWeight: 600, color: A.ink,
                   letterSpacing: '-0.02em', textAlign: 'center',
                   lineHeight: 1.2, whiteSpace: 'nowrap',
+                  opacity: hoveredLeistung === seg.li ? 1 : 0,
+                  transform: hoveredLeistung === seg.li ? 'translateY(0)' : 'translateY(18px)',
+                  transition: 'opacity 0.32s ease, transform 0.38s cubic-bezier(0.16,1,0.3,1)',
+                  transitionDelay: hoveredLeistung === seg.li ? '0.06s' : '0s',
                 }}>
                   {LEISTUNGEN[seg.li].titel}
                 </div>
                 {showDesc && (
                   <div style={{
                     fontSize: 18,
-                    color: 'rgba(255,255,255,0.82)',
+                    color: A.ink,
                     marginTop: 14, lineHeight: 1.55,
                     textAlign: 'center', maxWidth: 240,
+                    opacity: hoveredLeistung === seg.li ? 1 : 0,
+                    transform: hoveredLeistung === seg.li ? 'translateY(0)' : 'translateY(18px)',
+                    transition: 'opacity 0.32s ease, transform 0.38s cubic-bezier(0.16,1,0.3,1)',
+                    transitionDelay: hoveredLeistung === seg.li ? '0.15s' : '0s',
                   }}>
                     {LEISTUNGEN[seg.li].beschreibung}
                   </div>
@@ -143,7 +157,7 @@ export default function Home() {
             fontSize: isMobile ? 18 : 28,
             color: A.ink,
           }}>
-            Städtebau und Stadtplanung PartGmbB!
+            Städtebau und Stadtplanung PartG mbB
           </div>
           <p style={{
             fontSize: isMobile ? 17 : 21, lineHeight: 1.75, color: A.ink,

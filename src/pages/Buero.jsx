@@ -187,7 +187,7 @@ const LEISTUNGEN = [
       </svg>
     ),
     titel: 'Qualitätssichernde Verfahren',
-    text: 'Organisation und Steuerung von Wettbewerbs- und Gutachterverfahren. Mitwirkung als Berater, Fachexperte, Obergutachter und Fachpreisrichter.',
+    text: 'Organisation und Steuerung von Wettbewerbs- und Gutachterverfahren. Mitwirkung als Berater*innen, Fachexpert*innen, Obergutachter*innen und Fachpreisrichter*innen.',
   },
   {
     key: 'partizipation',
@@ -252,11 +252,11 @@ function Modal({ member, onClose }) {
         style={{
           background: A.bg,
           width: '100%',
-          maxWidth: 680,
+          maxWidth: 820,
           maxHeight: '90vh',
           overflowY: 'auto',
           position: 'relative',
-          padding: isMobile ? 24 : 40,
+          padding: isMobile ? 24 : 48,
         }}
       >
         <button
@@ -276,11 +276,11 @@ function Modal({ member, onClose }) {
 
         <div style={{
           display: 'flex',
-          gap: isMobile ? 20 : 32,
+          gap: isMobile ? 20 : 40,
           flexDirection: isMobile ? 'column' : 'row',
           alignItems: 'flex-start',
         }}>
-          <div style={{ flexShrink: 0, width: isMobile ? '50%' : 160 }}>
+          <div style={{ flexShrink: 0, width: isMobile ? '55%' : 200 }}>
             <img
               src={member.photo}
               alt={member.name}
@@ -295,36 +295,36 @@ function Modal({ member, onClose }) {
           </div>
 
           <div style={{ flex: 1, paddingTop: isMobile ? 0 : 2 }}>
-            <div style={{ fontSize: 13, color: A.mute, fontWeight: 600, marginBottom: 6 }}>
+            <div style={{ fontSize: 14, color: A.mute, fontWeight: 600, marginBottom: 7 }}>
               {member.rolle}
             </div>
 
             {member.email ? (
               <a href={`mailto:${member.email}`} style={{ color: A.ink, textDecoration: 'none' }}>
-                <div style={{ fontSize: 26, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+                <div style={{ fontSize: 30, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
                   {member.name}
                 </div>
               </a>
             ) : (
-              <div style={{ fontSize: 26, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+              <div style={{ fontSize: 30, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
                 {member.name}
               </div>
             )}
 
-            <div style={{ fontSize: 15, color: A.mute, marginTop: 6, lineHeight: 1.5, marginBottom: 20 }}>
+            <div style={{ fontSize: 16, color: A.mute, marginTop: 7, lineHeight: 1.5, marginBottom: 22 }}>
               {member.ausbildung}
             </div>
 
-            <div style={{ marginBottom: 18 }}>
+            <div style={{ marginBottom: 20 }}>
               {member.cv.map(([jahre, text]) => (
-                <div key={jahre} style={{ display: 'flex', gap: 14, fontSize: 15, lineHeight: 1.65, color: A.mute }}>
-                  <span style={{ minWidth: 84, flexShrink: 0, color: A.mute, fontSize: 14 }}>{jahre}</span>
+                <div key={jahre} style={{ display: 'flex', gap: 16, fontSize: 16, lineHeight: 1.65, color: A.mute }}>
+                  <span style={{ minWidth: 90, flexShrink: 0, color: A.mute, fontSize: 15 }}>{jahre}</span>
                   <span>{text}</span>
                 </div>
               ))}
             </div>
 
-            <div style={{ fontSize: 15, color: A.mute, lineHeight: 1.65 }}>
+            <div style={{ fontSize: 16, color: A.mute, lineHeight: 1.65 }}>
               <span style={{ color: A.ink }}>Aufgabenfelder — </span>
               {member.aufgaben}
             </div>

@@ -24,6 +24,14 @@ const CATEGORY_LABEL = {
   verfahrensbetreuung: 'Verfahrensbetreuung',
 };
 
+// Maps gendered Projektdaten labels coming from WordPress to gender-neutral
+// forms. Applied to <dt> labels at sync time so projects.js is always neutral,
+// regardless of what the WP editors typed. Keep the keys in sync with the
+// extractDaten() lookups in src/pages/Projekte.jsx.
+const LABEL_NEUTRAL = {
+  'Auftraggeber': 'Auftraggebende',
+};
+
 // Fallback values keyed by WP slug, used ONLY when auto-extraction yields
 // nothing. WordPress stays the source of truth (so a value updated in WP wins);
 // these just guarantee a known-correct value survives a transient fetch failure
@@ -59,9 +67,15 @@ function stripHtml(html) {
   );
 }
 
-// Extracts the Zeitraum value from the Projektdaten block in raw WP HTML.
-// The block is a series of alternating <p>label</p><p>value</p> pairs.
-function extractZeitraum(html) {
+// Extracts the Zeitraum value. Primary source: the processed content's
+// <dl class="slf-daten"> block (reliable dt/dd pairs). Fallback: the raw WP
+// HTML <p>label</p><p>value</p> structure.
+function extractZeitraum(processedContent, html) {
+  const fromContent = processedContent?.match(/<dt>Zeitraum<\/dt><dd>([\s\S]*?)<\/dd>/);
+  if (fromContent) {
+    const text = decodeHtmlEntities(fromContent[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim());
+    if (text) return text;
+  }
   if (!html) return null;
   const m = html.match(/<p[^>]*>\s*Zeitraum\s*<\/p>[\s\S]*?<p[^>]*>([\s\S]*?)<\/p>/i);
   if (!m) return null;
@@ -290,7 +304,8 @@ function extractLayout(html) {
       const rawValue = extractWidgetContainers(valueCol.inner)
         .map(w => cleanWidgetContent(w)).join(' ')
         .replace(/^<p[^>]*>([\s\S]*?)<\/p>$/, '$1').trim();
-      if (label && rawValue) dlItems.push(`<dt>${label}</dt><dd>${rawValue}</dd>`);
+      const neutralLabel = LABEL_NEUTRAL[label] || label;
+      if (label && rawValue) dlItems.push(`<dt>${neutralLabel}</dt><dd>${rawValue}</dd>`);
       continue;
     }
 
@@ -374,7 +389,7 @@ function mapPost(post, pageData = null) {
     content,
     ergebnis: pageData?.ergebnis || extractVerfahrenResult(content) || fallbacks.ergebnis || null,
     ort: null,
-    jahr: extractZeitraum(post.content?.rendered ?? null),
+    jahr: extractZeitraum(content, post.content?.rendered ?? null),
     kategorie: matchedTerms.map(t => CATEGORY_LABEL[t.slug]),
     flaeche: null,
     auftraggeber: null,

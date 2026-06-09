@@ -17,6 +17,60 @@ function extractDaten(content, key) {
   return m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() || null
 }
 
+const BUNDESLAENDER = [
+  'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
+  'Hamburg', 'Hessen', 'Mecklenburg-Vorpommern', 'Niedersachsen',
+  'Nordrhein-Westfalen', 'Rheinland-Pfalz', 'Saarland', 'Sachsen-Anhalt',
+  'Sachsen', 'Schleswig-Holstein', 'Thüringen',
+]
+
+// Reconnaît un Bundesland (insensible à la casse, espaces/tirets tolérés)
+// et renvoie sa forme canonique, sinon null.
+function canonLand(s) {
+  const norm = s.replace(/\s+/g, ' ').trim().toLowerCase().replace(/\s*-\s*/g, '-')
+  return BUNDESLAENDER.find(b => b.toLowerCase() === norm) || null
+}
+
+// Villes/communes sans Land explicite → Bundesland déduit.
+const ORT_LAND = [
+  ['Gladbeck', 'Nordrhein-Westfalen'],
+  ['Kassel', 'Hessen'],
+  ['Leipzig', 'Sachsen'],
+  ['Nürnberg', 'Bayern'],
+  ['Wolfsburg', 'Niedersachsen'],
+  ['Gransee', 'Brandenburg'],
+  ['Treptow-Köpenick', 'Berlin'],
+]
+
+// Met toujours le Land en premier, puis la ville/commune.
+function normalizeOrt(ort) {
+  if (!ort) return ort
+  let rest = ort
+  let land = null
+  // Land entre parenthèses, ex. "Stadt Rhede (Nordrhein-Westfalen)"
+  const paren = ort.match(/\(([^)]+)\)/)
+  if (paren && canonLand(paren[1])) {
+    land = canonLand(paren[1])
+    rest = ort.replace(/\s*\([^)]+\)\s*/, ' ').trim()
+  }
+  const parts = rest.split(',').map(s => s.trim()).filter(Boolean)
+  if (!land) {
+    const idx = parts.findIndex(p => canonLand(p))
+    if (idx >= 0) {
+      land = canonLand(parts[idx])
+      parts.splice(idx, 1)
+    }
+  }
+  // Land non précisé : on le déduit de la ville/commune.
+  if (!land) {
+    const lower = rest.toLowerCase()
+    const hit = ORT_LAND.find(([city]) => lower.includes(city.toLowerCase()))
+    if (hit) land = hit[1]
+  }
+  if (!land) return ort
+  return [land, ...parts].join(', ')
+}
+
 function lastYear(jahr) {
   if (!jahr) return 0
   const years = [...jahr.matchAll(/\d{4}/g)].map(m => parseInt(m[0]))
@@ -41,11 +95,11 @@ function sortedProjects(list, key, dir) {
       return dir === 'asc' ? va - vb : vb - va
     }
     if (key === 'auftraggeber') {
-      va = extractDaten(a.content, 'Auftraggeber') || ''
-      vb = extractDaten(b.content, 'Auftraggeber') || ''
+      va = extractDaten(a.content, 'Auftraggebende') || ''
+      vb = extractDaten(b.content, 'Auftraggebende') || ''
     } else if (key === 'ort') {
-      va = extractDaten(a.content, 'Ort') || ''
-      vb = extractDaten(b.content, 'Ort') || ''
+      va = normalizeOrt(extractDaten(a.content, 'Ort')) || ''
+      vb = normalizeOrt(extractDaten(b.content, 'Ort')) || ''
     } else if (key === 'kategorie') {
       va = [].concat(a.kategorie).join(', ')
       vb = [].concat(b.kategorie).join(', ')
@@ -79,7 +133,7 @@ function ColHeader({ label, colKey, sortKey, sortDir, onSort }) {
 
 const COLS = [
   { key: 'titel', label: 'Projekt', flex: '3' },
-  { key: 'auftraggeber', label: 'Auftraggeber', flex: '2' },
+  { key: 'auftraggeber', label: 'Auftraggebende', flex: '2' },
   { key: 'kategorie', label: 'Kategorie', flex: '1.5' },
   { key: 'jahr', label: 'Zeitraum', flex: '1' },
   { key: 'ort', label: 'Ort', flex: '1.5' },
@@ -148,6 +202,7 @@ export default function Projekte() {
                 fontSize: 15,
                 color: isActive ? A.ink : A.mute,
                 fontWeight: isActive ? 600 : 500,
+                marginLeft: f.key === 'projektliste' ? 'auto' : 0,
               }}
             >
               {f.label}
@@ -191,8 +246,8 @@ export default function Projekte() {
 
           {/* Rows */}
           {displayed.map((p) => {
-            const auftraggeber = extractDaten(p.content, 'Auftraggeber')
-            const ort = extractDaten(p.content, 'Ort')
+            const auftraggeber = extractDaten(p.content, 'Auftraggebende')
+            const ort = normalizeOrt(extractDaten(p.content, 'Ort'))
             return (
               <Link
                 key={p.id}
@@ -227,9 +282,9 @@ export default function Projekte() {
                         </span>
                       )}
                     </div>
-                    {p.beschreibung && (
+                    {p.untertitel && (
                       <div style={{ fontSize: 14, color: A.mute, marginTop: 3, lineHeight: 1.4 }}>
-                        {p.beschreibung.length > 100 ? p.beschreibung.slice(0, 100) + '…' : p.beschreibung}
+                        {p.untertitel}
                       </div>
                     )}
                   </div>

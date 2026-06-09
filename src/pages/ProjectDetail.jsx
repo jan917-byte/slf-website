@@ -114,7 +114,7 @@ export default function ProjectDetail() {
 
   const metaRows = [
     { label: 'Ort', value: project.ort },
-    { label: 'Auftraggeber', value: project.auftraggeber },
+    { label: 'Auftraggebende', value: project.auftraggeber },
     { label: 'Fläche', value: project.flaeche },
   ].filter(row => row.value != null)
 
