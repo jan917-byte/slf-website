@@ -5,7 +5,7 @@ import Nav from '../components/Nav'
 import Footer from '../components/Footer'
 import ProjectFeedItem from '../components/ProjectFeedItem'
 import projects from '../data/projects'
-import heroBild from '../assets/deckblatt-homepage-v3.jpg'
+import heroBild from '../assets/deckblatt-homepage-v4.jpg'
 import { useWindowWidth } from '../hooks/useWindowWidth'
 
 const FEATURED_IDS = [
@@ -21,16 +21,20 @@ const featured = FEATURED_IDS.map(id => projects.find(p => p.id === id)).filter(
 
 const LEISTUNGEN = [
   {
-    titel: 'Stadtentwicklung',
-    beschreibung: 'Quartiersentwicklung, Machbarkeitsstudien, integrierte Konzepte und Partizipationsverfahren.',
+    titel: 'Stadtplanung',
+    beschreibung: 'Strategische Planungen, Stadt- und Quartiersentwicklung sowie integrierte Entwicklungskonzepte.',
   },
   {
     titel: 'Städtebau',
-    beschreibung: 'Städtebauliche Entwürfe, Rahmenplanungen und Gestaltungskonzepte für urbane Räume.',
+    beschreibung: 'Städtebauliche Entwürfe, Rahmen- und Masterplanungen, Machbarkeitsstudien und Gestaltungskonzepte für urbane Räume.',
   },
   {
     titel: 'Bauleitplanung',
-    beschreibung: 'Flächennutzungspläne, Bebauungspläne und formelle Planungsverfahren nach BauGB.',
+    beschreibung: 'Flächennutzungspläne, Bebauungspläne, Satzungen und Änderungsverfahren sowie formelle Planungsverfahren nach BauGB.',
+  },
+  {
+    titel: 'Verfahrensbetreuung, Partizipation',
+    beschreibung: 'Wettbewerbsverfahren, formelle und informelle Beteiligungsverfahren sowie Kommunikation und Moderation.',
   },
 ]
 
@@ -49,16 +53,24 @@ export default function Home() {
   const contentCol = isMobile ? 'auto' : '3 / span 8'
   const contentColWide = isMobile ? 'auto' : '3 / span 9'
 
-  // Hero scales proportionally so objectFit:cover never crops the sides (which misaligns hover segments)
-  const heroContainerWidth = width - 2 * hPad
-  const heroHeight = Math.min(isMobile ? 420 : 660, Math.round(heroContainerWidth * (1423 / 2110)))
+  // The hero height must follow the image's exact aspect ratio so objectFit never
+  // crops it — any crop shifts the visible strips out from under the hover zones.
+  // Use the REAL container width (the app is capped at maxWidth 1400 in App.jsx, so
+  // window width overestimates it on wide screens) and floor() so the box aspect is
+  // never taller than the image (which would crop the sides and misalign segments).
+  // v4 composite is 2831×1423 (4 image strips + 3 white gaps).
+  const contentWidth = Math.min(width, 1400)
+  const heroContainerWidth = contentWidth - 2 * hPad
+  const heroHeight = Math.floor(heroContainerWidth * (1423 / 2831))
 
-  // Compute overlay title font size to fit "Stadtentwicklung" (16 chars) on one line
+  // Hero maps 4 service zones onto the v4 composite. Each image strip ≈ 23.6% wide.
   const heroPad = hPad * 2
-  const overlayPad = isMobile ? 16 : 48
-  const segContentWidth = (width - heroPad) * 0.3164 - overlayPad
+  const overlayPad = isMobile ? 12 : 36
+  const segContentWidth = (contentWidth - heroPad) * 0.236 - overlayPad
+  // Size to fit the longest single word ("Verfahrensbetreuung", 19 chars);
+  // titles are allowed to wrap, so this only sets an upper bound.
   // D-DIN char width ≈ 0.52em for this condensed font
-  const titleFontSize = Math.min(isMobile ? 15 : 28, Math.max(9, Math.floor(segContentWidth / (20 * 0.52))))
+  const titleFontSize = Math.min(isMobile ? 13 : 24, Math.max(9, Math.floor(segContentWidth / (19 * 0.52))))
   const showDesc = width >= 1000
 
   return (
@@ -75,11 +87,14 @@ export default function Home() {
         />
         <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
           {[
-            { li: 0, flex: '0 0 31.64%' },
-            { gap: true, flex: '0 0 2.43%' },
-            { li: 1, flex: '0 0 31.79%' },
-            { gap: true, flex: '0 0 2.36%' },
-            { li: 2, flex: '1' },
+            // Measured against the v4 composite (2831px wide): 4 image strips + 3 gaps.
+            { li: 0, flex: '0 0 23.60%' },
+            { gap: true, flex: '0 0 1.80%' },
+            { li: 1, flex: '0 0 23.67%' },
+            { gap: true, flex: '0 0 1.77%' },
+            { li: 2, flex: '0 0 23.70%' },
+            { gap: true, flex: '0 0 1.80%' },
+            { li: 3, flex: '1' },
           ].map((seg, i) => seg.gap ? (
             <div key={i} style={{ flex: seg.flex, pointerEvents: 'none' }} />
           ) : (
@@ -109,7 +124,7 @@ export default function Home() {
                   fontSize: titleFontSize,
                   fontWeight: 600, color: A.ink,
                   letterSpacing: '-0.02em', textAlign: 'center',
-                  lineHeight: 1.2, whiteSpace: 'nowrap',
+                  lineHeight: 1.2,
                   opacity: hoveredLeistung === seg.li ? 1 : 0,
                   transform: hoveredLeistung === seg.li ? 'translateY(0)' : 'translateY(18px)',
                   transition: 'opacity 0.32s ease, transform 0.38s cubic-bezier(0.16,1,0.3,1)',
@@ -163,13 +178,13 @@ export default function Home() {
             fontSize: isMobile ? 17 : 21, lineHeight: 1.75, color: A.ink,
             maxWidth: 640, marginTop: 32,
           }}>
-            Wir verfügen über eine umfassende Erfahrung in der praxisorientierten Stadtplanung und im kontextuellen Städtebau.
+            Wir verfügen über umfassende Erfahrungen in der integrierten Stadtplanung, im kontextuellen Städtebau und in der bauleitplanerischen Umsetzung.
           </p>
           <p style={{
             fontSize: isMobile ? 17 : 21, lineHeight: 1.75, color: A.ink,
             maxWidth: 640, marginTop: 20,
           }}>
-            Wir arbeiten integrativ, komplex, fachübergreifend sowie teamorientiert und engagieren uns für die Sicherung einer menschenwürdigen Umwelt.
+            Wir arbeiten integrativ, komplex, fachübergreifend sowie teamorientiert und engagieren uns für die Sicherung einer menschenwürdigen, nachhaltigen und gleichwertigen Umwelt.
           </p>
           <p style={{ marginTop: 20, fontSize: isMobile ? 17 : 21, color: A.ink, lineHeight: 1.75, maxWidth: 640 }}>
             Wir freuen uns auf spannende Projekte und weiterhin gute Zusammenarbeit in alten und neuen Konstellationen!

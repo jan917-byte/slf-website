@@ -207,21 +207,23 @@ Three sections after the hero (numbered "01 / …" labels have been removed in f
 
 ### Hero hover interaction (`src/pages/Home.jsx`)
 
-The hero image (`deckblatt-homepage-v3.jpg`) is a composite JPG of 3 sub-images with white gaps. Five absolutely-positioned flex segments (3 hotspots + 2 gap spacers) map to `LEISTUNGEN[0–2]`. `hoveredLeistung` state drives overlay opacity.
+The hero image (`deckblatt-homepage-v4.jpg`, 2831×1423) is a composite JPG of **4 sub-images** with white gaps. Seven absolutely-positioned flex segments (4 hotspots + 3 gap spacers) map to `LEISTUNGEN[0–3]`. `hoveredLeistung` state drives overlay opacity.
 
-Flex proportions (measured at 1400px width):
+Flex proportions (measured against the v4 composite):
 
 | Segment | Flex | Role |
 |---|---|---|
-| `0 0 31.64%` | Image 1 | Konzeptionell |
-| `0 0 2.43%` | Gap 1 | inactive |
-| `0 0 31.79%` | Image 2 | Städtebau |
-| `0 0 2.36%` | Gap 2 | inactive |
-| `1` | Image 3 | Bauleitplanung |
+| `0 0 23.60%` | Image 1 | Stadtplanung |
+| `0 0 1.80%` | Gap 1 | inactive |
+| `0 0 23.67%` | Image 2 | Städtebau |
+| `0 0 1.77%` | Gap 2 | inactive |
+| `0 0 23.70%` | Image 3 | Bauleitplanung |
+| `0 0 1.80%` | Gap 3 | inactive |
+| `1` | Image 4 | Verfahrensbetreuung, Partizipation |
 
-If the hero image is replaced, re-measure gaps and update the segment array in `Home.jsx`.
+The 4th strip (Verfahrensbetreuung) is a photo recropped to the same vertical strip format (≈670×1423) and appended to the original 3-image composite. To rebuild after swapping images: detect the white gap columns and re-paste strips with Pillow (no ImageMagick available; `sips` can't concatenate). Then update the segment percentages and the `heroHeight` aspect ratio (`1423 / 2831`) in `Home.jsx`.
 
-Hero overlay text sizing is computed dynamically: `titleFontSize = Math.min(max, Math.floor(segWidth / (charCount * 0.52)))` where 0.52 is the D-DIN character width ratio. This prevents "Quartiersentwicklung" (20 chars) from wrapping. Description text is hidden below `width < 1000` (`showDesc` flag).
+Hero overlay text sizing is computed dynamically: `titleFontSize = Math.min(max, Math.floor(segWidth / (19 * 0.52)))` where 0.52 is the D-DIN character width ratio, sized to fit the longest single word ("Verfahrensbetreuung", 19 chars). Titles are allowed to wrap (no `whiteSpace: nowrap`). Description text is hidden below `width < 1000` (`showDesc` flag).
 
 ### Project detail page (`src/pages/ProjectDetail.jsx`)
 
