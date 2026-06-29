@@ -22,18 +22,22 @@ const featured = FEATURED_IDS.map(id => projects.find(p => p.id === id)).filter(
 const LEISTUNGEN = [
   {
     titel: 'Stadtplanung',
+    label: 'Stadtplanung',
     beschreibung: 'Strategische Planungen, Stadt- und Quartiersentwicklung sowie integrierte Entwicklungskonzepte.',
   },
   {
     titel: 'Städtebau',
+    label: 'Städtebau',
     beschreibung: 'Städtebauliche Entwürfe, Rahmen- und Masterplanungen, Machbarkeitsstudien und Gestaltungskonzepte für urbane Räume.',
   },
   {
     titel: 'Bauleitplanung',
+    label: 'Bauleitplanung',
     beschreibung: 'Flächennutzungspläne, Bebauungspläne, Satzungen und Änderungsverfahren sowie formelle Planungsverfahren nach BauGB.',
   },
   {
     titel: 'Verfahrensbetreuung, Partizipation',
+    label: 'Verfahren',
     beschreibung: 'Wettbewerbsverfahren, formelle und informelle Beteiligungsverfahren sowie Kommunikation und Moderation.',
   },
 ]
@@ -64,10 +68,10 @@ export default function Home() {
   const heroPad = hPad * 2
   const overlayPad = isMobile ? 12 : 36
   const segContentWidth = (contentWidth - heroPad) * 0.236 - overlayPad
-  // Size to fit the longest single word ("Verfahrensbetreuung", 19 chars);
-  // titles are allowed to wrap, so this only sets an upper bound.
-  // D-DIN char width ≈ 0.52em for this condensed font
-  const titleFontSize = Math.min(isMobile ? 13 : 24, Math.max(9, Math.floor(segContentWidth / (19 * 0.52))))
+  // Persistent nameplate uses the short LEISTUNGEN.label; size to fit the longest
+  // short label ("Bauleitplanung", 14 chars). Titles are allowed to wrap, so this
+  // only sets an upper bound. D-DIN char width ≈ 0.52em for this condensed font.
+  const titleFontSize = Math.min(isMobile ? 13 : 26, Math.max(9, Math.floor(segContentWidth / (14 * 0.52))))
   const showDesc = width >= 1000
 
   return (
@@ -101,44 +105,31 @@ export default function Home() {
               onMouseLeave={() => setHoveredLeistung(null)}
               style={{ flex: seg.flex, position: 'relative', cursor: 'default', overflow: 'hidden' }}
             >
-              {/* Background layer — fades in quickly */}
+              {/* Nameplate — title always visible; turns khaki and grows
+                  upward on hover to reveal the description below it. */}
               <div style={{
-                position: 'absolute', inset: 0,
-                background: 'rgba(243,241,227,0.92)',
-                opacity: hoveredLeistung === seg.li ? 1 : 0,
-                transition: 'opacity 0.2s ease',
-                pointerEvents: 'none',
-              }} />
-              {/* Text layer — slides up with stagger */}
-              <div style={{
-                position: 'absolute', inset: 0,
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center',
-                padding: isMobile ? 8 : 24,
+                position: 'absolute', left: 0, right: 0, bottom: 0,
+                padding: isMobile ? '8px 8px' : '12px 14px',
+                background: hoveredLeistung === seg.li ? 'rgba(243,241,227,0.96)' : 'rgba(255,255,255,0.9)',
+                transition: 'background 0.25s ease',
                 pointerEvents: 'none',
               }}>
                 <div style={{
                   fontSize: titleFontSize,
                   fontWeight: 600, color: A.ink,
-                  letterSpacing: '-0.02em', textAlign: 'center',
-                  lineHeight: 1.2,
-                  opacity: hoveredLeistung === seg.li ? 1 : 0,
-                  transform: hoveredLeistung === seg.li ? 'translateY(0)' : 'translateY(18px)',
-                  transition: 'opacity 0.32s ease, transform 0.38s cubic-bezier(0.16,1,0.3,1)',
-                  transitionDelay: hoveredLeistung === seg.li ? '0.06s' : '0s',
+                  letterSpacing: '-0.02em', lineHeight: 1.2,
                 }}>
-                  {LEISTUNGEN[seg.li].titel}
+                  {LEISTUNGEN[seg.li].label}
                 </div>
                 {showDesc && (
                   <div style={{
-                    fontSize: 18,
-                    color: A.ink,
-                    marginTop: 14, lineHeight: 1.55,
-                    textAlign: 'center', maxWidth: 240,
+                    fontSize: isMobile ? 12 : 14,
+                    color: A.ink, lineHeight: 1.5,
+                    overflow: 'hidden',
+                    maxHeight: hoveredLeistung === seg.li ? 220 : 0,
                     opacity: hoveredLeistung === seg.li ? 1 : 0,
-                    transform: hoveredLeistung === seg.li ? 'translateY(0)' : 'translateY(18px)',
-                    transition: 'opacity 0.32s ease, transform 0.38s cubic-bezier(0.16,1,0.3,1)',
-                    transitionDelay: hoveredLeistung === seg.li ? '0.15s' : '0s',
+                    marginTop: hoveredLeistung === seg.li ? 8 : 0,
+                    transition: 'max-height 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.28s ease, margin-top 0.3s ease',
                   }}>
                     {LEISTUNGEN[seg.li].beschreibung}
                   </div>
@@ -261,24 +252,6 @@ export default function Home() {
           large={i === 0}
         />
       ))}
-
-      {/* Notiz */}
-      <div style={{
-        padding: `${vPad}px ${hPad}px`,
-        display: 'grid', gridTemplateColumns: gridCols, gap: 24,
-      }}>
-        <div style={{ gridColumn: contentCol }}>
-          <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 600, letterSpacing: '-0.01em', marginBottom: 16 }}>
-            Notiz
-          </div>
-          <p style={{ fontSize: 17, lineHeight: 1.5, color: A.ink, margin: 0, maxWidth: 680 }}>
-            Nach mehr als 30 Jahren hat <em>J. Miller Stevens</em> das Büro an
-            Georg Börsch-Supan, Samir Hamzeh und Barbara Horst übergeben.
-            J. Miller Stevens wird uns weiterhin mit seinem umfangreichen
-            Erfahrungsschatz bei der Projektarbeit unterstützen.
-          </p>
-        </div>
-      </div>
 
       <Footer />
     </div>
