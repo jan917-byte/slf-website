@@ -109,26 +109,35 @@ export default function Home() {
                   upward on hover to reveal the description below it. */}
               <div style={{
                 position: 'absolute', left: 0, right: 0, bottom: 0,
-                padding: isMobile ? '8px 8px' : '12px 14px',
-                background: hoveredLeistung === seg.li ? 'rgba(243,241,227,0.96)' : 'rgba(255,255,255,0.9)',
+                padding: isMobile ? '8px 8px' : '14px 14px',
+                background: hoveredLeistung === seg.li ? 'rgba(243,241,227,0.92)' : 'rgba(255,255,255,0.72)',
                 transition: 'background 0.25s ease',
                 pointerEvents: 'none',
               }}>
                 <div style={{
-                  fontSize: titleFontSize,
-                  fontWeight: 600, color: A.ink,
-                  letterSpacing: '-0.02em', lineHeight: 1.2,
+                  fontSize: Math.round(titleFontSize * 0.78),
+                  fontWeight: hoveredLeistung === seg.li ? 700 : 500, color: A.ink,
+                  letterSpacing: '-0.01em', lineHeight: 1.2,
+                  whiteSpace: hoveredLeistung === seg.li ? 'normal' : 'nowrap',
                 }}>
-                  {LEISTUNGEN[seg.li].label}
+                  {seg.li === 3 ? (
+                    <>
+                      Verfahrensbetreuung
+                      <span style={{
+                        opacity: hoveredLeistung === 3 ? 1 : 0,
+                        transition: 'opacity 0.25s ease',
+                      }}>, Partizipation</span>
+                    </>
+                  ) : LEISTUNGEN[seg.li].titel}
                 </div>
                 {showDesc && (
                   <div style={{
-                    fontSize: isMobile ? 12 : 14,
-                    color: A.ink, lineHeight: 1.5,
+                    fontSize: isMobile ? 13 : 16,
+                    color: A.ink, lineHeight: 1.55,
                     overflow: 'hidden',
-                    maxHeight: hoveredLeistung === seg.li ? 220 : 0,
+                    maxHeight: hoveredLeistung === seg.li ? 260 : 0,
                     opacity: hoveredLeistung === seg.li ? 1 : 0,
-                    marginTop: hoveredLeistung === seg.li ? 8 : 0,
+                    marginTop: hoveredLeistung === seg.li ? 10 : 0,
                     transition: 'max-height 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.28s ease, margin-top 0.3s ease',
                   }}>
                     {LEISTUNGEN[seg.li].beschreibung}
