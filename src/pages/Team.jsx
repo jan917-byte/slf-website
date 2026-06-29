@@ -4,7 +4,28 @@ import Footer from '../components/Footer'
 import BackToTop from '../components/BackToTop'
 import { tokens as A, base } from '../tokens'
 import { useWindowWidth } from '../hooks/useWindowWidth'
+import { ensureImageStyles } from '../components/SmartImage'
 import { TEAM } from '../data/team'
+
+ensureImageStyles()
+
+// Image with a shimmer skeleton while loading. The img keeps its aspectRatio so
+// the skeleton (absolute) fills the reserved box; both live in a relative parent.
+function ImgWithSkeleton({ src, alt, style }) {
+  const [loaded, setLoaded] = useState(false)
+  return (
+    <>
+      {!loaded && <div className="slf-img-skeleton" />}
+      <img
+        src={src}
+        alt={alt}
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+        style={{ ...style, position: 'relative', opacity: loaded ? 1 : 0, transition: 'opacity 0.4s ease' }}
+      />
+    </>
+  )
+}
 
 function Modal({ member, onClose }) {
   const width = useWindowWidth()
@@ -64,8 +85,8 @@ function Modal({ member, onClose }) {
           flexDirection: isMobile ? 'column' : 'row',
           alignItems: 'flex-start',
         }}>
-          <div style={{ flexShrink: 0, width: isMobile ? '55%' : 200 }}>
-            <img
+          <div style={{ flexShrink: 0, width: isMobile ? '55%' : 200, position: 'relative' }}>
+            <ImgWithSkeleton
               src={member.photo}
               alt={member.name}
               style={{
@@ -136,6 +157,7 @@ function Modal({ member, onClose }) {
 
 function TeamCard({ member, onClick }) {
   const [hovered, setHovered] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   return (
     <div
@@ -145,16 +167,20 @@ function TeamCard({ member, onClick }) {
       style={{ cursor: 'pointer' }}
     >
       <div style={{ position: 'relative', overflow: 'hidden' }}>
+        {!loaded && <div className="slf-img-skeleton" />}
         <img
           src={member.photo}
           alt={member.name}
+          onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
           style={{
             display: 'block',
             width: '100%',
             aspectRatio: '3 / 4',
             objectFit: 'cover',
             objectPosition: 'top',
-            transition: 'transform 0.4s ease',
+            opacity: loaded ? 1 : 0,
+            transition: 'transform 0.4s ease, opacity 0.4s ease',
             transform: hovered ? 'scale(1.04)' : 'scale(1)',
           }}
         />

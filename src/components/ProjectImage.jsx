@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { tokens as A } from '../tokens'
 import { useWindowWidth } from '../hooks/useWindowWidth'
+import { ensureImageStyles } from './SmartImage'
+
+ensureImageStyles()
 
 const RATIO_MAP = {
   '16/10': '62.5%',
@@ -11,6 +14,7 @@ const RATIO_MAP = {
 
 export default function ProjectImage({ proj, ratio = '4/3', title, subtitle, ergebnis, style = {} }) {
   const [hovered, setHovered] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   const width = useWindowWidth()
   const paddingTop = RATIO_MAP[ratio] ?? '75%'
   const isPhoto = proj?.tone !== 'plan'
@@ -28,14 +32,18 @@ export default function ProjectImage({ proj, ratio = '4/3', title, subtitle, erg
       onMouseLeave={() => setHovered(false)}
       style={{ position: 'relative', width: '100%', paddingTop, overflow: 'hidden', cursor: 'pointer', ...stripeStyle, ...style }}
     >
+      {proj?.image && !loaded && <div className="slf-img-skeleton" />}
       {proj?.image && (
         <img
           src={proj.image}
           alt={proj.titel}
+          onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
             transform: hovered ? 'scale(1.03)' : 'scale(1)',
-            transition: 'transform 0.4s ease',
+            opacity: loaded ? 1 : 0,
+            transition: 'transform 0.4s ease, opacity 0.4s ease',
           }}
         />
       )}

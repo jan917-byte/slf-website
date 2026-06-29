@@ -17,8 +17,21 @@ const PROSE_STYLES = `
 .slf-prose strong { font-weight: 500; }
 .slf-prose a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .slf-prose blockquote { margin: 1.4em 0; padding-left: 1.2em; border-left: 2px solid #e6e5e2; color: #6b6b6e; font-style: italic; }
-.slf-prose img { max-width: 100%; height: auto; display: block; cursor: zoom-in; transition: opacity 0.18s; }
+@keyframes slf-shimmer { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
+.slf-img-skeleton {
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, #eceae4 25%, #f5f4ef 50%, #eceae4 75%);
+  background-size: 200% 100%;
+  animation: slf-shimmer 1.4s ease-in-out infinite;
+}
+.slf-prose img {
+  max-width: 100%; height: auto; display: block; cursor: zoom-in; transition: opacity 0.18s;
+  background: linear-gradient(100deg, #eceae4 25%, #f5f4ef 50%, #eceae4 75%);
+  background-size: 200% 100%;
+  animation: slf-shimmer 1.4s ease-in-out infinite;
+}
 .slf-prose img:hover { opacity: 0.8; }
+@media (prefers-reduced-motion: reduce) { .slf-img-skeleton, .slf-prose img { animation: none; } }
 .slf-zoom-img { cursor: zoom-in; transition: opacity 0.18s; }
 .slf-zoom-img:hover { opacity: 0.8; }
 @keyframes slf-lb-in { from { opacity: 0; transform: scale(0.97) } to { opacity: 1; transform: scale(1) } }
@@ -95,6 +108,7 @@ export default function ProjectDetail() {
   const isMobile = width < 768
 
   const [lightbox, setLightbox] = useState(null)
+  const [heroLoaded, setHeroLoaded] = useState(false)
 
   useEffect(() => {
     if (!lightbox) return
@@ -147,26 +161,34 @@ export default function ProjectDetail() {
             </div>
           )}
           {isMobile ? (
-            <img
-              src={project.image}
-              alt={project.titel}
-              className="slf-zoom-img"
-              onClick={() => setLightbox({ src: project.image, caption: null })}
-              style={{ width: '100%', display: 'block' }}
-            />
+            <div style={{ position: 'relative', minHeight: heroLoaded ? 0 : 220 }}>
+              {!heroLoaded && <div className="slf-img-skeleton" />}
+              <img
+                src={project.image}
+                alt={project.titel}
+                className="slf-zoom-img"
+                onClick={() => setLightbox({ src: project.image, caption: null })}
+                onLoad={() => setHeroLoaded(true)}
+                onError={() => setHeroLoaded(true)}
+                style={{ width: '100%', display: 'block', position: 'relative', opacity: heroLoaded ? 1 : 0, transition: 'opacity 0.4s ease' }}
+              />
+            </div>
           ) : (
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(12, 1fr)',
               gap: '0 24px',
             }}>
-              <div style={{ gridColumn: '3 / span 8' }}>
+              <div style={{ gridColumn: '3 / span 8', position: 'relative', minHeight: heroLoaded ? 0 : 360 }}>
+                {!heroLoaded && <div className="slf-img-skeleton" />}
                 <img
                   src={project.image}
                   alt={project.titel}
                   className="slf-zoom-img"
                   onClick={() => setLightbox({ src: project.image, caption: null })}
-                  style={{ width: '100%', display: 'block' }}
+                  onLoad={() => setHeroLoaded(true)}
+                  onError={() => setHeroLoaded(true)}
+                  style={{ width: '100%', display: 'block', position: 'relative', opacity: heroLoaded ? 1 : 0, transition: 'opacity 0.4s ease' }}
                 />
               </div>
             </div>

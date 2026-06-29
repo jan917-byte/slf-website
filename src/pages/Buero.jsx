@@ -4,7 +4,28 @@ import Nav from '../components/Nav'
 import Footer from '../components/Footer'
 import BackToTop from '../components/BackToTop'
 import { useWindowWidth } from '../hooks/useWindowWidth'
+import { ensureImageStyles } from '../components/SmartImage'
 import { TEAM } from '../data/team'
+
+ensureImageStyles()
+
+// Image with a shimmer skeleton while loading; img keeps its aspectRatio/size so
+// the absolute skeleton fills the reserved box. Parent must be position: relative.
+function ImgWithSkeleton({ src, alt, style }) {
+  const [loaded, setLoaded] = useState(false)
+  return (
+    <>
+      {!loaded && <div className="slf-img-skeleton" />}
+      <img
+        src={src}
+        alt={alt}
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+        style={{ ...style, position: 'relative', opacity: loaded ? 1 : 0, transition: 'opacity 0.4s ease' }}
+      />
+    </>
+  )
+}
 
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
@@ -53,7 +74,7 @@ function GalleryFigure({ src, caption, shape }) {
     >
       {/* image-only wrapper so the khaki shape never overlaps the caption below */}
       <div style={{ position: 'relative', lineHeight: 0 }}>
-        <img
+        <ImgWithSkeleton
           src={src}
           alt={caption}
           style={{
@@ -280,8 +301,8 @@ function Modal({ member, onClose }) {
           flexDirection: isMobile ? 'column' : 'row',
           alignItems: 'flex-start',
         }}>
-          <div style={{ flexShrink: 0, width: isMobile ? '55%' : 200 }}>
-            <img
+          <div style={{ flexShrink: 0, width: isMobile ? '55%' : 200, position: 'relative' }}>
+            <ImgWithSkeleton
               src={member.photo}
               alt={member.name}
               style={{
@@ -337,6 +358,7 @@ function Modal({ member, onClose }) {
 
 function TeamCard({ member, onClick }) {
   const [hovered, setHovered] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   return (
     <div
@@ -346,16 +368,20 @@ function TeamCard({ member, onClick }) {
       style={{ cursor: 'pointer' }}
     >
       <div style={{ position: 'relative', overflow: 'hidden' }}>
+        {!loaded && <div className="slf-img-skeleton" />}
         <img
           src={member.photo}
           alt={member.name}
+          onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
           style={{
             display: 'block',
             width: '100%',
             aspectRatio: '3 / 4',
             objectFit: 'cover',
             objectPosition: 'top',
-            transition: 'transform 0.4s ease',
+            opacity: loaded ? 1 : 0,
+            transition: 'transform 0.4s ease, opacity 0.4s ease',
             transform: hovered ? 'scale(1.04)' : 'scale(1)',
           }}
         />
@@ -396,7 +422,8 @@ export default function Buero() {
 
       {/* Hero */}
       <div style={{ paddingLeft: isMobile ? 12 : 36, paddingRight: isMobile ? 12 : 36 }}>
-        <img
+        <div style={{ position: 'relative', height: isMobile ? 220 : 500 }}>
+        <ImgWithSkeleton
           src="https://www.slf-berlin.de/wordpress/wp-content/uploads/2025/01/img-0826-erweitert-1536x990.jpg"
           alt="Stadt Land Fluss — Büro"
           style={{
@@ -407,6 +434,7 @@ export default function Buero() {
             objectPosition: 'center 30%',
           }}
         />
+        </div>
       </div>
 
       {/* 01 / Büro — Über uns */}
