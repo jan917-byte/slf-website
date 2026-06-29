@@ -53,15 +53,12 @@ export default function Home() {
   const contentCol = isMobile ? 'auto' : '3 / span 8'
   const contentColWide = isMobile ? 'auto' : '3 / span 9'
 
-  // The hero height must follow the image's exact aspect ratio so objectFit never
-  // crops it — any crop shifts the visible strips out from under the hover zones.
-  // Use the REAL container width (the app is capped at maxWidth 1400 in App.jsx, so
-  // window width overestimates it on wide screens) and floor() so the box aspect is
-  // never taller than the image (which would crop the sides and misalign segments).
+  // The hero image keeps its natural aspect ratio (height:auto, no objectFit:cover)
+  // so it is NEVER cropped — cropping would shift the visible strips out from under
+  // the fixed-percentage hover zones. The relative wrapper sizes itself to the image,
+  // so the inset:0 overlay matches the image box exactly at any screen width.
   // v4 composite is 2831×1423 (4 image strips + 3 white gaps).
   const contentWidth = Math.min(width, 1400)
-  const heroContainerWidth = contentWidth - 2 * hPad
-  const heroHeight = Math.floor(heroContainerWidth * (1423 / 2831))
 
   // Hero maps 4 service zones onto the v4 composite. Each image strip ≈ 23.6% wide.
   const heroPad = hPad * 2
@@ -83,7 +80,7 @@ export default function Home() {
         <img
           src={heroBild}
           alt="Deckblatt — Quartiersentwicklung, Lageplan & Bebauungsplan"
-          style={{ display: 'block', width: '100%', height: heroHeight, objectFit: 'cover' }}
+          style={{ display: 'block', width: '100%', height: 'auto' }}
         />
         <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
           {[
